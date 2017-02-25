@@ -1,9 +1,9 @@
 //
-// "$Id: RasterView.h 79 2006-05-13 20:38:27Z mike $"
+// "$Id: RasterView.h 510 2015-08-26 01:46:51Z msweet $"
 //
 // CUPS raster file viewer application window header file.
 //
-// Copyright 2002-2006 by Michael Sweet.
+// Copyright 2002-2015 by Michael R Sweet.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #  include "RasterDisplay.h"
 #  include <FL/Fl_Double_Window.H>
 #  include <FL/Fl_Button.H>
+#  include <FL/Fl_Check_Button.H>
 #  include <FL/Fl_Sys_Menu_Bar.H>
 #  include <FL/Fl_Text_Display.H>
 #  include <FL/Fl_Help_Dialog.H>
@@ -48,8 +49,10 @@ class RasterView : public Fl_Double_Window
   Fl_Group		*buttons_;	// Button bar
   Fl_Button		*next_button_,	// Next page button
 			*attrs_button_;	// Toggle attributes button
-  Fl_Text_Display	*attributes_;	// Attributes
-  Fl_Text_Buffer	*attr_buffer_;	// Attribute buffer
+  Fl_Group		*attributes_;	// Attributes pane
+  Fl_Button		*colors_[15];	// Color buttons
+  Fl_Text_Display	*header_;	// Page header
+  Fl_Text_Buffer	*header_buffer_;// Attribute buffer
 
   static RasterView	*first_;	// First window in list
   static Fl_Help_Dialog	*help_;		// Help dialog
@@ -61,6 +64,7 @@ class RasterView : public Fl_Double_Window
   static void	attrs_cb(Fl_Widget *widget);
   static void	close_cb(Fl_Widget *widget);
   static void	color_cb(RasterDisplay *display);
+  static void	device_cb(Fl_Widget *widget);
   static void	help_cb();
   void		init();
   void		load_attrs();
@@ -85,5 +89,5 @@ class RasterView : public Fl_Double_Window
 #endif // !RasterView_h
 
 //
-// End of "$Id: RasterView.h 79 2006-05-13 20:38:27Z mike $".
+// End of "$Id: RasterView.h 510 2015-08-26 01:46:51Z msweet $".
 //

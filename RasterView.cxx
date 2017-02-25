@@ -1,9 +1,9 @@
 //
-// "$Id: RasterView.cxx 502 2011-05-18 16:37:00Z mike $"
+// "$Id: RasterView.cxx 514 2015-08-26 21:39:41Z msweet $"
 //
 // CUPS raster file viewer application window code.
 //
-// Copyright 2002-2011 by Michael Sweet.
+// Copyright 2002-2015 by Michael R Sweet.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,24 +15,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// Contents:
-//
-//   RasterView::apple_open_cb() - Open a file.
-//   RasterView::attrs_cb()      - Toggle attributes.
-//   RasterView::close_cb()      - Close this window.
-//   RasterView::init()          - Initialize the window.
-//   RasterView::load_attrs()    - Load attributes into the display.
-//   RasterView::next_cb()       - Show the next page.
-//   RasterView::open_file()     - Open a raster file in a new window.
-//   RasterView::open_cb()       - Open a new file.
-//   RasterView::quit_cb()       - Quit the application.
-//   RasterView::reopen_cb()     - Re-open the current file.
-//   RasterView::resize()        - Resize the window.
-//   RasterView::set_filename()  - Set the filename and window title.
-//   RasterView::RasterView()    - Create a new window.
-//   RasterView::RasterView()    - Create a new window.
-//   RasterView::~RasterView()   - Destroy a window.
-//
 
 //
 // Include necessary headers...
@@ -42,6 +24,7 @@
 #define FL_INTERNAL
 #include "RasterView.h"
 #include <FL/Fl.H>
+#include <FL/Fl_Color_Chooser.H>
 #include <FL/Fl_File_Chooser.H>
 #include <FL/x.H>
 
@@ -55,7 +38,8 @@
 #else
 #  define MENU_OFFSET	25
 #endif // __APPLE__
-#define ATTRS_WIDTH	300
+#define ATTRS_WIDTH	310
+#define DEVICEN_HEIGHT	30
 
 #define HELP_HTML \
 "<HTML>\n" \
@@ -82,7 +66,7 @@
 "<LI><CODE>-</CODE>: Zoom out</LI>\n" \
 "<LI><CODE>=</CODE>: Zoom in</LI>\n" \
 "<LI><CODE>C</CODE>: Click or drag mouse to view colors</LI>\n" \
-"<LI><CODE>P</CODE>: Drag mouse to pan (</LI>\n" \
+"<LI><CODE>P</CODE>: Drag mouse to pan</LI>\n" \
 "<LI><CODE>Z</CODE>: Click or drag mouse to zoom in</LI>\n" \
 "<LI><CODE>SHIFT + Z</CODE>: Click to zoom out</LI>\n" \
 "<LI><CODE>CTRL/CMD + A</CODE>: Show/hide the page attributes</LI>\n" \
@@ -110,7 +94,10 @@ Fl_Help_Dialog	*RasterView::help_ = 0;
 void
 RasterView::apple_open_cb(const char *f)// I - File to open
 {
+#  ifdef DEBUG
   fprintf(stderr, "Opening \"%s\" via Apple event.\n", f);
+#  endif // DEBUG
+
   open_file(f);
 }
 #endif // __APPLE__
@@ -272,6 +259,36 @@ RasterView::color_cb(
 
 
 //
+// 'RasterView::device_cb()' - Handle device color changes.
+//
+
+void
+RasterView::device_cb(
+    Fl_Widget *widget)			// I - Widget
+{
+  RasterView		*view;		// I - Window
+  int			i;		// Looping var
+
+
+  view = (RasterView *)(widget->window());
+  for (i = 0; i < 15; i ++)
+    if (widget == view->colors_[i])
+    {
+      uchar r, g, b;
+
+      Fl::get_color(view->display_->device_color(i), r, g, b);
+
+      if (fl_color_chooser(widget->label(), r, g, b))
+      {
+        view->display_->device_color(i, fl_rgb_color(r, g, b));
+        reopen_cb(widget);
+      }
+      break;
+    }
+}
+
+
+//
 // 'RasterView::handle()' - Handle global shortcuts...
 //
 
@@ -330,6 +347,24 @@ RasterView::init()
       {0},
     {0}
   };
+  static const char * const color_labels[] =
+  {
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15"
+  };
 
 
   menubar_ = new Fl_Sys_Menu_Bar(0, 0, w(), 25);
@@ -353,12 +388,21 @@ RasterView::init()
   buttons_->resizable(attrs_button_);
   buttons_->end();
 
-  attributes_ = new Fl_Text_Display(w(), 0, ATTRS_WIDTH, h());
-  attr_buffer_ = new Fl_Text_Buffer(65536);
-  attributes_->buffer(attr_buffer_);
-  attributes_->textfont(FL_COURIER);
-  attributes_->textsize(12);
-  attributes_->box(FL_DOWN_BOX);
+  attributes_ = new Fl_Group(w(), 0, ATTRS_WIDTH, h());
+    header_ = new Fl_Text_Display(w(), 0, ATTRS_WIDTH, h() - DEVICEN_HEIGHT);
+    header_buffer_ = new Fl_Text_Buffer(65536);
+    header_->buffer(header_buffer_);
+    header_->textfont(FL_COURIER);
+    header_->textsize(12);
+    header_->box(FL_DOWN_BOX);
+
+    for (int i = 0; i < 15; i ++)
+    {
+      colors_[i] = new Fl_Button(w() + 5 + 20 * i, h() - DEVICEN_HEIGHT + 5, 20, 20, color_labels[i]);
+      colors_[i]->callback(device_cb);
+    }
+  attributes_->resizable(header_);
+  attributes_->end();
   attributes_->hide();
 
   end();
@@ -463,187 +507,354 @@ RasterView::load_attrs()
 
   header = display_->header();
 
-  attr_buffer_->text("Page Attributes:\n\n");
-
-  snprintf(s, sizeof(s), "MediaClass = \"%s\"\n", header->MediaClass);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "MediaColor = \"%s\"\n", header->MediaColor);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "MediaType = \"%s\"\n", header->MediaType);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "OutputType = \"%s\"\n", header->OutputType);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "AdvanceDistance = %d\n", header->AdvanceDistance);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "AdvanceMedia = %d\n", header->AdvanceMedia);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "Collate = %d\n", header->Collate);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "CutMedia = %d\n", header->CutMedia);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "Duplex = %d\n", header->Duplex);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "HWResolution = [ %d %d ]\n",
-           header->HWResolution[0], header->HWResolution[1]);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "ImagingBoundingBox = [ %d %d %d %d ]\n",
-           header->ImagingBoundingBox[0],
-	   header->ImagingBoundingBox[1],
-	   header->ImagingBoundingBox[2],
-	   header->ImagingBoundingBox[3]);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "InsertSheet = %d\n", header->InsertSheet);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "Jog = %d\n", header->Jog);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "LeadingEdge = %d\n", header->LeadingEdge);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "Margins = [ %d %d ]\n",
-           header->Margins[0], header->Margins[1]);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "ManualFeed = %d\n", header->ManualFeed);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "MediaPosition = %d\n", header->MediaPosition);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "MediaWeight = %d\n", header->MediaWeight);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "MirrorPrint = %d\n", header->MirrorPrint);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "NegativePrint = %d\n", header->NegativePrint);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "NumCopies = %d\n", header->NumCopies);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "Orientation = %d\n", header->Orientation);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "OutputFaceUp = %d\n", header->OutputFaceUp);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "PageSize = [ %d %d ]\n", header->PageSize[0],
-           header->PageSize[1]);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "Separations = %d\n", header->Separations);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "TraySwitch = %d\n", header->TraySwitch);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "Tumble = %d\n", header->Tumble);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsWidth = %d\n", header->cupsWidth);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsHeight = %d\n", header->cupsHeight);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsMediaType = %d\n", header->cupsMediaType);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsBitsPerColor = %d\n", header->cupsBitsPerColor);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsBitsPerPixel = %d\n", header->cupsBitsPerPixel);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsBytesPerLine = %d\n", header->cupsBytesPerLine);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsColorOrder = %s\n",
-           header->cupsColorOrder == CUPS_ORDER_CHUNKED ? "CUPS_ORDER_CHUNKED" :
-	       header->cupsColorOrder == CUPS_ORDER_BANDED ? "CUPS_ORDER_BANDED" :
-	       header->cupsColorOrder == CUPS_ORDER_PLANAR ? "CUPS_ORDER_PLANAR" :
-	       "UNKNOWN");
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsColorSpace = %s\n",
-           header->cupsColorSpace < (int)(sizeof(cspaces) / sizeof(cspaces[0])) ?
-	       cspaces[header->cupsColorSpace] : "UNKNOWN");
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsCompression = %d\n", header->cupsCompression);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsRowCount = %d\n", header->cupsRowCount);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsRowFeed = %d\n", header->cupsRowFeed);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsRowStep = %d\n", header->cupsRowStep);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsNumColors = %d\n", header->cupsNumColors);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsBorderlessScalingFactor = %f\n",
-           header->cupsBorderlessScalingFactor);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsPageSize = [ %f %f ]\n",
-           header->cupsPageSize[0], header->cupsPageSize[1]);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsImagingBBox = [ %f %f %f %f ]\n",
-           header->cupsImagingBBox[0], header->cupsImagingBBox[1],
-	   header->cupsImagingBBox[2], header->cupsImagingBBox[3]);
-  attr_buffer_->append(s);
-
-  for (i = 0; i < 16; i ++)
+  if (!strcmp(header->MediaClass, "PwgRaster"))
   {
-    snprintf(s, sizeof(s), "cupsInteger%d = %d\n", i + 1,
-             header->cupsInteger[i]);
-    attr_buffer_->append(s);
+    header_buffer_->text("PWG Raster Page Attributes:\n\n");
+
+    snprintf(s, sizeof(s), "MediaColor = \"%s\"\n", header->MediaColor);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "MediaType = \"%s\"\n", header->MediaType);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "PrintContentOptimize = \"%s\"\n", header->OutputType);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "CutMedia = %d\n", header->CutMedia);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Duplex = %d\n", header->Duplex);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "HWResolution = [ %d %d ]\n",
+	     header->HWResolution[0], header->HWResolution[1]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "InsertSheet = %d\n", header->InsertSheet);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Jog = %d\n", header->Jog);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "LeadingEdge = %d\n", header->LeadingEdge);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "MediaPosition = %d\n", header->MediaPosition);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "MediaWeightMetric = %d\n", header->MediaWeight);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "NumCopies = %d\n", header->NumCopies);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Orientation = %d\n", header->Orientation);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "PageSize = [ %d %d ]\n", header->PageSize[0],
+	     header->PageSize[1]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Tumble = %d\n", header->Tumble);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Width = %d\n", header->cupsWidth);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Height = %d\n", header->cupsHeight);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "BitsPerColor = %d\n", header->cupsBitsPerColor);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "BitsPerPixel = %d\n", header->cupsBitsPerPixel);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "BytesPerLine = %d\n", header->cupsBytesPerLine);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "ColorOrder = %s\n",
+	     header->cupsColorOrder == CUPS_ORDER_CHUNKED ? "CUPS_ORDER_CHUNKED" :
+		 header->cupsColorOrder == CUPS_ORDER_BANDED ? "CUPS_ORDER_BANDED" :
+		 header->cupsColorOrder == CUPS_ORDER_PLANAR ? "CUPS_ORDER_PLANAR" :
+		 "UNKNOWN");
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "ColorSpace = %s\n",
+	     header->cupsColorSpace < (int)(sizeof(cspaces) / sizeof(cspaces[0])) ?
+		 cspaces[header->cupsColorSpace] : "UNKNOWN");
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "NumColors = %d\n", header->cupsNumColors);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "TotalPageCount = %u\n", header->cupsInteger[0]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "CrossFeedTransform = %d\n", header->cupsInteger[1]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "FeedTransform = %d\n", header->cupsInteger[2]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "ImageBoxLeft = %u\n", header->cupsInteger[3]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "ImageBoxTop = %u\n", header->cupsInteger[4]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "ImageBoxRight = %u\n", header->cupsInteger[5]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "ImageBoxBottom = %u\n", header->cupsInteger[6]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "AlternatePrimary = %06x (%u, %u, %u)\n", header->cupsInteger[7], (header->cupsInteger[7] >> 16) & 255, (header->cupsInteger[7] >> 8) & 255, header->cupsInteger[7] & 255);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "PrintQuality = %u\n", header->cupsInteger[8]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "VendorIdentifier = %u\n", header->cupsInteger[14]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "VendorLength = %u\n", header->cupsInteger[15]);
+    header_buffer_->append(s);
+
+    unsigned char	*data = (unsigned char *)header->cupsReal;
+    unsigned		dataidx, datalen = header->cupsInteger[15];
+
+    header_buffer_->append("VendorData =");
+
+    for (dataidx = 0; dataidx < datalen; dataidx ++)
+    {
+      if ((dataidx & 7) == 0)
+	header_buffer_->append("\n   ");
+
+      snprintf(s, sizeof(s), " %02X", *data++);
+      header_buffer_->append(s);
+    }
+
+    header_buffer_->append("\n");
+
+    snprintf(s, sizeof(s), "RenderingIntent = \"%s\"\n",
+	     header->cupsRenderingIntent);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "PageSizeName = \"%s\"\n",
+	     header->cupsPageSizeName);
+    header_buffer_->append(s);
+  }
+  else
+  {
+    header_buffer_->text("CUPS Raster Page Attributes:\n\n");
+
+    snprintf(s, sizeof(s), "MediaClass = \"%s\"\n", header->MediaClass);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "MediaColor = \"%s\"\n", header->MediaColor);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "MediaType = \"%s\"\n", header->MediaType);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "OutputType = \"%s\"\n", header->OutputType);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "AdvanceDistance = %d\n", header->AdvanceDistance);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "AdvanceMedia = %d\n", header->AdvanceMedia);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Collate = %d\n", header->Collate);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "CutMedia = %d\n", header->CutMedia);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Duplex = %d\n", header->Duplex);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "HWResolution = [ %d %d ]\n",
+	     header->HWResolution[0], header->HWResolution[1]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "ImagingBoundingBox = [ %d %d %d %d ]\n",
+	     header->ImagingBoundingBox[0],
+	     header->ImagingBoundingBox[1],
+	     header->ImagingBoundingBox[2],
+	     header->ImagingBoundingBox[3]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "InsertSheet = %d\n", header->InsertSheet);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Jog = %d\n", header->Jog);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "LeadingEdge = %d\n", header->LeadingEdge);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Margins = [ %d %d ]\n",
+	     header->Margins[0], header->Margins[1]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "ManualFeed = %d\n", header->ManualFeed);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "MediaPosition = %d\n", header->MediaPosition);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "MediaWeight = %d\n", header->MediaWeight);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "MirrorPrint = %d\n", header->MirrorPrint);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "NegativePrint = %d\n", header->NegativePrint);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "NumCopies = %d\n", header->NumCopies);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Orientation = %d\n", header->Orientation);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "OutputFaceUp = %d\n", header->OutputFaceUp);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "PageSize = [ %d %d ]\n", header->PageSize[0],
+	     header->PageSize[1]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Separations = %d\n", header->Separations);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "TraySwitch = %d\n", header->TraySwitch);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "Tumble = %d\n", header->Tumble);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsWidth = %d\n", header->cupsWidth);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsHeight = %d\n", header->cupsHeight);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsMediaType = %d\n", header->cupsMediaType);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsBitsPerColor = %d\n", header->cupsBitsPerColor);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsBitsPerPixel = %d\n", header->cupsBitsPerPixel);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsBytesPerLine = %d\n", header->cupsBytesPerLine);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsColorOrder = %s\n",
+	     header->cupsColorOrder == CUPS_ORDER_CHUNKED ? "CUPS_ORDER_CHUNKED" :
+		 header->cupsColorOrder == CUPS_ORDER_BANDED ? "CUPS_ORDER_BANDED" :
+		 header->cupsColorOrder == CUPS_ORDER_PLANAR ? "CUPS_ORDER_PLANAR" :
+		 "UNKNOWN");
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsColorSpace = %s\n",
+	     header->cupsColorSpace < (int)(sizeof(cspaces) / sizeof(cspaces[0])) ?
+		 cspaces[header->cupsColorSpace] : "UNKNOWN");
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsCompression = %d\n", header->cupsCompression);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsRowCount = %d\n", header->cupsRowCount);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsRowFeed = %d\n", header->cupsRowFeed);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsRowStep = %d\n", header->cupsRowStep);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsNumColors = %d\n", header->cupsNumColors);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsBorderlessScalingFactor = %f\n",
+	     header->cupsBorderlessScalingFactor);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsPageSize = [ %f %f ]\n",
+	     header->cupsPageSize[0], header->cupsPageSize[1]);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsImagingBBox = [ %f %f %f %f ]\n",
+	     header->cupsImagingBBox[0], header->cupsImagingBBox[1],
+	     header->cupsImagingBBox[2], header->cupsImagingBBox[3]);
+    header_buffer_->append(s);
+
+    for (i = 0; i < 16; i ++)
+    {
+      snprintf(s, sizeof(s), "cupsInteger%d = %d\n", i + 1,
+	       header->cupsInteger[i]);
+      header_buffer_->append(s);
+    }
+
+    for (i = 0; i < 16; i ++)
+    {
+      snprintf(s, sizeof(s), "cupsReal%d = %f\n", i + 1, header->cupsReal[i]);
+      header_buffer_->append(s);
+    }
+
+    for (i = 0; i < 16; i ++)
+    {
+      snprintf(s, sizeof(s), "cupsString%d = \"%s\"\n", i + 1,
+	       header->cupsString[i]);
+      header_buffer_->append(s);
+    }
+
+    snprintf(s, sizeof(s), "cupsMarkerType = \"%s\"\n",
+	     header->cupsMarkerType);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsRenderingIntent = \"%s\"\n",
+	     header->cupsRenderingIntent);
+    header_buffer_->append(s);
+
+    snprintf(s, sizeof(s), "cupsPageSizeName = \"%s\"\n",
+	     header->cupsPageSizeName);
+    header_buffer_->append(s);
   }
 
-  for (i = 0; i < 16; i ++)
+ /*
+  * Set device colors for the given color space...
+  */
+
+  for (i = 0; i < header->cupsNumColors; i ++)
   {
-    snprintf(s, sizeof(s), "cupsReal%d = %f\n", i + 1, header->cupsReal[i]);
-    attr_buffer_->append(s);
-  }
+    Fl_Color c = display_->device_color(i);
 
-  for (i = 0; i < 16; i ++)
+    colors_[i]->show();
+    colors_[i]->color(c);
+    colors_[i]->labelcolor(fl_contrast(FL_BLACK, c));
+    colors_[i]->redraw();
+  }
+  for (; i < 15; i ++)
+    colors_[i]->hide();
+
+  if (display_->is_subtractive() && header->cupsBitsPerColor >= 8)
   {
-    snprintf(s, sizeof(s), "cupsString%d = \"%s\"\n", i + 1,
-             header->cupsString[i]);
-    attr_buffer_->append(s);
+    for (i = 0; i < 15; i ++)
+      colors_[i]->activate();
   }
-
-  snprintf(s, sizeof(s), "cupsMarkerType = \"%s\"\n",
-           header->cupsMarkerType);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsRenderingIntent = \"%s\"\n",
-           header->cupsRenderingIntent);
-  attr_buffer_->append(s);
-
-  snprintf(s, sizeof(s), "cupsPageSizeName = \"%s\"\n",
-           header->cupsPageSizeName);
-  attr_buffer_->append(s);
-
-  attributes_->redraw();
+  else
+  {
+    for (i = 0; i < 15; i ++)
+      colors_[i]->deactivate();
+  }
+  header_->redraw();
 }
 
 
@@ -701,7 +912,7 @@ RasterView::open_file(const char *f)	// I - File to open
 
   view->set_filename(f);
 
-  argv[0] = "rasterview";
+  argv[0] = (char *)"rasterview";
   view->show(1, argv);
 
   view->reopen_cb(view);
@@ -756,7 +967,7 @@ RasterView::reopen_cb(Fl_Widget *widget)// I - Menu or window
     return;
 
   view->loading_ = 1;
-    view->attr_buffer_->text("Loading...");
+    view->header_buffer_->text("Loading...");
     view->display_->open_file(view->filename_);
     view->load_attrs();
   view->loading_ = 0;
@@ -886,5 +1097,5 @@ RasterView::~RasterView()
 
 
 //
-// End of "$Id: RasterView.cxx 502 2011-05-18 16:37:00Z mike $".
+// End of "$Id: RasterView.cxx 514 2015-08-26 21:39:41Z msweet $".
 //

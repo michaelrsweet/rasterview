@@ -43,9 +43,13 @@ for option in $*; do
 			;;
 		W | RGB | RGBA | K | CMY | YMC | CMYK | YMCK | KCMY | \
 		KCMYcm | GMCK | GMCS | WHITE | GOLD | SILVER | RGBW | \
+		sW | sRGB | AdobeRGB | \
 		CIEXYZ | CIELab | ICC1 | ICC2 | ICC3 | ICC4 | ICC5 | \
 		ICC6 | ICC7 | ICC8 | ICC9 | ICCA | ICCB | ICCC | ICCD | \
-		ICCE | ICCF)
+		ICCE | ICCF | \
+		Device1 | Device2 | Device3 | Device4 | Device5 | Device6 | \
+		Device7 | Device8 | Device9 | DeviceA | DeviceB | DeviceC | \
+		DeviceD | DeviceE | DeviceF)
 			cspaces="$cspaces $option"
 			;;
 		pstoraster | imagetoraster | cgimagetoraster | cgpdftoraster)
@@ -54,9 +58,14 @@ for option in $*; do
 		all)
 			cspaces="W RGB RGBA K CMY YMC CMYK YMCK KCMY KCMYcm"
 			cspaces="$cspaces GMCK GMCS WHITE GOLD SILVER RGBW"
+			cspaces="$cspaces sW sRGB AdobeRGB"
 			cspaces="$cspaces CIEXYZ CIELab ICC1 ICC2 ICC3 ICC4"
 			cspaces="$cspaces ICC5 ICC6 ICC7 ICC8 ICC9 ICCA ICCB"
 			cspaces="$cspaces ICCC ICCD ICCE ICCF"
+			cspaces="$cspaces Device1 Device2 Device3 Device4"
+			cspaces="$cspaces Device5 Device6 Device7 Device8"
+			cspaces="$cspaces Device9 DeviceA DeviceB DeviceC"
+			cspaces="$cspaces DeviceD DeviceE DeviceF"
 			depths="1 2 4 8 16"
 			orders="Chunked Banded"
 			;;
@@ -65,7 +74,7 @@ for option in $*; do
 			rm -f *.ras *.log
 			exit 0
 			;;
-			
+
 		help)
 			echo "Usage: $0 [colorspace(s)] [depth(s)] [order(s)] [filter]"
 			echo "       $0 all"
@@ -73,9 +82,14 @@ for option in $*; do
 			echo ""
 			echo "Colorspaces: W RGB RGBA K CMY YMC CMYK YMCK KCMY KCMYcm"
 			echo "             GMCK GMCS WHITE GOLD SILVER RGBW"
+			echo "             sW sRGB AdobeRGB"
 			echo "             CIEXYZ CIELab ICC1 ICC2 ICC3 ICC4"
 			echo "             ICC5 ICC6 ICC7 ICC8 ICC9 ICCA ICCB"
 			echo "             ICCC ICCD ICCE ICCF"
+			echo "             Device1 Device2 Device3 Device4"
+			echo "             Device5 Device6 Device7 Device8"
+			echo "             Device9 DeviceA DeviceB DeviceC"
+			echo "             DeviceD DeviceE DeviceF"
 			echo ""
 			echo "Depths: 1 2 4 8 16"
 			echo ""
@@ -85,7 +99,7 @@ for option in $*; do
 			echo ""
 			exit 0
 			;;
-			
+
 		*)
 			echo "Unknown option '$option'!"
 			exit 1

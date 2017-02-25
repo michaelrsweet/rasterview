@@ -1,9 +1,9 @@
 //
-// "$Id: RasterDisplay.cxx 504 2011-05-19 04:58:10Z mike $"
+// "$Id: RasterDisplay.cxx 514 2015-08-26 21:39:41Z msweet $"
 //
 // CUPS/PWG Raster display widget methods.
 //
-// Copyright 2002-2011 by Michael Sweet.
+// Copyright 2002-2015 by Michael R Sweet.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,44 +15,13 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// Contents:
-//
-//   RasterDisplay::RasterDisplay()     - Create a new raster display widget.
-//   RasterDisplay::~RasterDisplay()    - Destroy a raster display widget.
-//   RasterDisplay::close_file()        - Close an opened raster file.
-//   RasterDisplay::draw()              - Draw the raster display widget.
-//   RasterDisplay::get_color()         - Return the original color value for a coordinate.
-//   RasterDisplay::get_pixel()         - Return the displayed color value for a coordinate.
-//   RasterDisplay::handle()            - Handle events in the widget.
-//   RasterDisplay::image_cb()          - Provide a single line of an image.
-//   RasterDisplay::load_page()         - Load the next page from a raster stream.
-//   RasterDisplay::open_file()         - Open a raster file for viewing.
-//   RasterDisplay::position()          - Reposition the image on the screen.
-//   RasterDisplay::resize()            - Resize the raster display widget.
-//   RasterDisplay::scale()             - Scale the image.
-//   RasterDisplay::scrollbar_cb()      - Update the display based on the scrollbar position.
-//   RasterDisplay::update_mouse_xy()   - Update the mouse X and Y values.
-//   RasterDisplay::update_scrollbars() - Update the scrollbars.
-//   convert_cmy()                      - Convert CMY raster data.
-//   convert_cmyk()                     - Convert CMYK raster data.
-//   convert_k()                        - Convert black raster data.
-//   convert_kcmy()                     - Convert KCMY or KCMYcm (8-bit) raster data.
-//   convert_kcmycm()                   - Convert KCMYcm (1-bit) raster data.
-//   convert_lab()                      - Convert CIE Lab or ICCn raster data.
-//   convert_rgb()                      - Convert RGB raster data.
-//   convert_rgba()                     - Convert RGBA raster data.
-//   convert_rgbw()                     - Convert RGBW raster data.
-//   convert_w()                        - Convert grayscale raster data.
-//   convert_xyz()                      - Convert CIE XYZ raster data.
-//   convert_ymc()                      - Convert YMC raster data.
-//   convert_ymck()                     - Convert YMCK, GMCK, or GMCS raster data.
-//
 
 #include "RasterDisplay.h"
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
 #include <FL/fl_ask.H>
 #include <FL/fl_draw.H>
+#include <FL/Fl_Preferences.H>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -82,7 +51,9 @@
 // Local globals...
 //
 
-static int	endian_offset = -1;
+static int		endian_offset = -1;
+static Fl_Preferences	*prefs = NULL;
+
 
 
 //
@@ -93,6 +64,7 @@ static void	convert_cmy(cups_page_header2_t *header, uchar *line,
 		            uchar *colors, uchar *pixels);
 static void	convert_cmyk(cups_page_header2_t *header, uchar *line,
 		             uchar *colors, uchar *pixels);
+static void	convert_device(cups_page_header2_t *header, uchar *line, uchar *colors, uchar *pixels, uchar device_colors[][3]);
 static void	convert_k(cups_page_header2_t *header, uchar *line,
 		          uchar *colors, uchar *pixels);
 static void	convert_kcmy(cups_page_header2_t *header, uchar *line,
@@ -641,6 +613,51 @@ RasterDisplay::image_cb(void  *p,	// I - Raster display widget
 
 
 //
+// 'RasterDisplay::is_subtractive()' - Is the color space subtractive?
+//
+
+int
+RasterDisplay::is_subtractive()
+{
+  return ((header_.cupsColorSpace >= CUPS_CSPACE_K && header_.cupsColorSpace <= CUPS_CSPACE_SILVER) ||
+          (header_.cupsColorSpace >= CUPS_CSPACE_DEVICE1 && header_.cupsColorSpace <= CUPS_CSPACE_DEVICEF));
+}
+
+
+//
+// 'RasterDisplay::load_colors()' - Load device colors.
+//
+
+void
+RasterDisplay::load_colors()
+{
+  int		i;			// Looping var
+  char		key[256],		// Key string
+		*value;			// Value
+  unsigned	c, m ,y;		// Colors
+
+
+  if (!is_subtractive() || header_.cupsBitsPerColor < 8)
+    return;
+
+  if (!prefs)
+    prefs = new Fl_Preferences(Fl_Preferences::USER, "msweet.org", "rasterview");
+
+  for (i = 0; i < header_.cupsNumColors; i ++)
+  {
+    snprintf(key, sizeof(key), "cs%dc%d", header_.cupsColorSpace, i);
+
+    if (prefs->get(key, value, "") && sscanf(value, "%u %u %u", &c, &m, &y) == 3)
+    {
+      device_colors_[i][0] = c;
+      device_colors_[i][1] = m;
+      device_colors_[i][2] = y;
+    }
+  }
+}
+
+
+//
 // 'RasterDisplay::load_page()' - Load the next page from a raster stream.
 //
 
@@ -669,10 +686,8 @@ RasterDisplay::load_page()
   memcpy(&header_, &next_header_, sizeof(header_));
 
 #ifdef DEBUG
-  fprintf(stderr, "DEBUG: sizeof(cups_page_header_t) = %d\n",
-          sizeof(cups_page_header_t));
-  fprintf(stderr, "DEBUG: sizeof(cups_page_header2_t) = %d\n",
-          sizeof(cups_page_header2_t));
+  fprintf(stderr, "DEBUG: sizeof(cups_page_header_t) = %d\n", (int)sizeof(cups_page_header_t));
+  fprintf(stderr, "DEBUG: sizeof(cups_page_header2_t) = %d\n", (int)sizeof(cups_page_header2_t));
   fprintf(stderr, "DEBUG: MediaClass = \"%s\"\n", header_.MediaClass);
   fprintf(stderr, "DEBUG: MediaColor = \"%s\"\n", header_.MediaColor);
   fprintf(stderr, "DEBUG: MediaType = \"%s\"\n", header_.MediaType);
@@ -750,7 +765,7 @@ RasterDisplay::load_page()
           header_.cupsNumColors);
 #endif // DEBUG
 
-  bpp_ = header_.cupsNumColors == 1 ? 1 : 3;
+  bpp_ = ((header_.cupsBitsPerColor < 8 || !is_subtractive()) && header_.cupsNumColors == 1) ? 1 : 3;
 
   if (header_.cupsWidth == 0 || header_.cupsWidth > 1000000 ||
       header_.cupsHeight == 0 || header_.cupsHeight > 1000000)
@@ -838,6 +853,54 @@ RasterDisplay::load_page()
       endian_offset = 1;		// Little endian
   }
 
+  // Set device colors...
+  memset(device_colors_, 255, sizeof(device_colors_));
+
+  switch (header_.cupsColorSpace)
+  {
+    case CUPS_CSPACE_DEVICE3 :
+    case CUPS_CSPACE_DEVICE4 :
+    case CUPS_CSPACE_CMY :
+    case CUPS_CSPACE_CMYK :
+        device_colors_[0][1] = device_colors_[0][2] = 0;
+        device_colors_[1][0] = device_colors_[1][2] = 0;
+        device_colors_[2][0] = device_colors_[2][1] = 0;
+	break;
+
+    case CUPS_CSPACE_YMC :
+    case CUPS_CSPACE_YMCK :
+        device_colors_[0][0] = device_colors_[0][1] = 0;
+        device_colors_[1][0] = device_colors_[1][2] = 0;
+        device_colors_[2][1] = device_colors_[2][2] = 0;
+        break;
+
+    case CUPS_CSPACE_DEVICE6 :
+        device_colors_[0][1] = device_colors_[0][2] = 0;
+        device_colors_[1][0] = device_colors_[1][2] = 0;
+        device_colors_[2][0] = device_colors_[2][1] = 0;
+        device_colors_[4][0] = 127; device_colors_[4][1] = device_colors_[4][2] = 0;
+        device_colors_[5][1] = 127; device_colors_[5][0] = device_colors_[5][2] = 0;
+	break;
+
+    case CUPS_CSPACE_W :
+    case CUPS_CSPACE_SW :
+        device_colors_[0][0] = device_colors_[0][1] = device_colors_[0][2] = 0;
+        break;
+
+    case CUPS_CSPACE_RGB :
+    case CUPS_CSPACE_SRGB :
+    case CUPS_CSPACE_ADOBERGB :
+        device_colors_[0][0] = 0;
+        device_colors_[1][1] = 0;
+        device_colors_[2][2] = 0;
+        break;
+
+    default :
+        break;
+  }
+
+  load_colors();
+
   // Read the raster data...
   uchar *pptr,				// Pointer into pixels_
 	*cptr;				// Pointer into colors_
@@ -864,6 +927,24 @@ RasterDisplay::load_page()
 
     switch (header_.cupsColorSpace)
     {
+      case CUPS_CSPACE_DEVICE1 :
+      case CUPS_CSPACE_DEVICE2 :
+      case CUPS_CSPACE_DEVICE3 :
+      case CUPS_CSPACE_DEVICE4 :
+      case CUPS_CSPACE_DEVICE5 :
+      case CUPS_CSPACE_DEVICE6 :
+      case CUPS_CSPACE_DEVICE7 :
+      case CUPS_CSPACE_DEVICE8 :
+      case CUPS_CSPACE_DEVICE9 :
+      case CUPS_CSPACE_DEVICEA :
+      case CUPS_CSPACE_DEVICEB :
+      case CUPS_CSPACE_DEVICEC :
+      case CUPS_CSPACE_DEVICED :
+      case CUPS_CSPACE_DEVICEE :
+      case CUPS_CSPACE_DEVICEF :
+          convert_device(&header_, line, cptr, pptr, device_colors_);
+          break;
+
       case CUPS_CSPACE_W :
       case CUPS_CSPACE_SW :
           convert_w(&header_, line, cptr, pptr);
@@ -887,17 +968,24 @@ RasterDisplay::load_page()
       case CUPS_CSPACE_WHITE :
       case CUPS_CSPACE_GOLD :
       case CUPS_CSPACE_SILVER :
-      case CUPS_CSPACE_DEVICE1 :
-          convert_k(&header_, line, cptr, pptr);
+          if (header_.cupsBitsPerColor >= 8)
+            convert_device(&header_, line, cptr, pptr, device_colors_);
+          else
+	    convert_k(&header_, line, cptr, pptr);
 	  break;
 
       case CUPS_CSPACE_CMY :
-      case CUPS_CSPACE_DEVICE3 :
-          convert_cmy(&header_, line, cptr, pptr);
+          if (header_.cupsBitsPerColor >= 8)
+            convert_device(&header_, line, cptr, pptr, device_colors_);
+          else
+	    convert_cmy(&header_, line, cptr, pptr);
 	  break;
 
       case CUPS_CSPACE_YMC :
-          convert_ymc(&header_, line, cptr, pptr);
+          if (header_.cupsBitsPerColor >= 8)
+            convert_device(&header_, line, cptr, pptr, device_colors_);
+          else
+            convert_ymc(&header_, line, cptr, pptr);
 	  break;
 
       case CUPS_CSPACE_KCMYcm :
@@ -907,18 +995,26 @@ RasterDisplay::load_page()
 	    break;
 	  }
       case CUPS_CSPACE_KCMY :
-          convert_kcmy(&header_, line, cptr, pptr);
+          if (header_.cupsBitsPerColor >= 8)
+            convert_device(&header_, line, cptr, pptr, device_colors_);
+          else
+	    convert_kcmy(&header_, line, cptr, pptr);
 	  break;
 
       case CUPS_CSPACE_CMYK :
-      case CUPS_CSPACE_DEVICE4 :
-          convert_cmyk(&header_, line, cptr, pptr);
+          if (header_.cupsBitsPerColor >= 8)
+            convert_device(&header_, line, cptr, pptr, device_colors_);
+          else
+	    convert_cmyk(&header_, line, cptr, pptr);
 	  break;
 
       case CUPS_CSPACE_YMCK :
       case CUPS_CSPACE_GMCK :
       case CUPS_CSPACE_GMCS :
-          convert_ymck(&header_, line, cptr, pptr);
+          if (header_.cupsBitsPerColor >= 8)
+            convert_device(&header_, line, cptr, pptr, device_colors_);
+          else
+	    convert_ymck(&header_, line, cptr, pptr);
 	  break;
 
       case CUPS_CSPACE_CIEXYZ :
@@ -1073,6 +1169,36 @@ RasterDisplay::resize(int X,		// I - New X position
   update_scrollbars();
 
   redraw();
+}
+
+
+//
+// 'RasterDisplay::save_colors()' - Save device colors.
+//
+
+void
+RasterDisplay::save_colors()
+{
+  int		i;			// Looping var
+  char		key[256],		// Key string
+		value[256];		// Value
+
+
+  if (!is_subtractive() || header_.cupsBitsPerColor < 8)
+    return;
+
+  if (!prefs)
+    prefs = new Fl_Preferences(Fl_Preferences::USER, "msweet.org", "rasterview");
+
+  for (i = 0; i < header_.cupsNumColors; i ++)
+  {
+    snprintf(key, sizeof(key), "cs%dc%d", header_.cupsColorSpace, i);
+    snprintf(value, sizeof(value), "%d %d %d", device_colors_[i][0], device_colors_[i][1], device_colors_[i][2]);
+
+    prefs->set(key, value);
+  }
+
+  prefs->flush();
 }
 
 
@@ -2150,6 +2276,119 @@ convert_cmyk(
     }
   }
 }
+
+
+//
+// 'convert_device()' - Convert Device-N raster data.
+//
+
+static void
+convert_device(
+    cups_page_header2_t *header,	// I - Raster header */
+    uchar               *line,		// I - Raster line
+    uchar               *colors,	// O - Original pixels
+    uchar               *pixels,	// O - RGB pixels
+    uchar               device_colors[][3])
+    					// I - RGB values for each device color
+{
+  int	x,				// X position in line
+	z,				// Color
+	w,				// Width of line
+	val;				// Pixel value
+  uchar	*cptr,				// Cyan pointer
+	*mptr,				// Magenta pointer
+	*yptr,				// Yellow pointer
+	*kptr,				// Black pointer
+	bit;				// Current bit
+  int	r, g, b;			// Current RGB color
+
+
+  w = header->cupsWidth;
+
+  if (header->cupsColorOrder != CUPS_ORDER_CHUNKED)
+  {
+    fputs("Error: Unsupported color order for Device-N...\n", stderr);
+    return;
+  }
+
+  if (header->cupsBitsPerColor != 8 && header->cupsBitsPerColor != 16)
+  {
+    fputs("Error: Unsupported bit depth for Device-N...\n", stderr);
+    return;
+  }
+
+  switch (header->cupsBitsPerColor)
+  {
+    case 8 :
+	for (x = w; x > 0; x --)
+	{
+	  r = g = b = 255;
+	  for (z = 0; z < header->cupsNumColors; z ++)
+	  {
+	    *colors++ = val = *line++;
+
+	    r -= val * device_colors[z][0] / 255;
+	    g -= val * device_colors[z][1] / 255;
+	    b -= val * device_colors[z][2] / 255;
+	  }
+
+	  if (r <= 0)
+	    *pixels++ = 0;
+	  else
+	    *pixels++ = r;
+
+	  if (g <= 0)
+	    *pixels++ = 0;
+	  else
+	    *pixels++ = g;
+
+	  if (b <= 0)
+	    *pixels++ = 0;
+	  else
+	    *pixels++ = b;
+	}
+	break;
+    case 16 :
+	for (x = w; x > 0; x --)
+	{
+	  r = g = b = 255;
+	  for (z = 0; z < header->cupsNumColors; z ++)
+	  {
+	    if (endian_offset)
+	    {
+	      *colors++ = *line++;
+	      *colors++ = val = *line++;
+	    }
+	    else
+	    {
+	      *colors++ = val = *line++;
+	      *colors++ = *line++;
+	    }
+
+	    r -= val * device_colors[z][0] / 255;
+	    g -= val * device_colors[z][1] / 255;
+	    b -= val * device_colors[z][2] / 255;
+	  }
+
+	  if (r <= 0)
+	    *pixels++ = 0;
+	  else
+	    *pixels++ = r;
+
+	  if (g <= 0)
+	    *pixels++ = 0;
+	  else
+	    *pixels++ = g;
+
+	  if (b <= 0)
+	    *pixels++ = 0;
+	  else
+	    *pixels++ = b;
+	}
+	break;
+  }
+}
+
 
 
 //
@@ -5370,5 +5609,5 @@ convert_ymck(
 
 
 //
-// End of "$Id: RasterDisplay.cxx 504 2011-05-19 04:58:10Z mike $".
+// End of "$Id: RasterDisplay.cxx 514 2015-08-26 21:39:41Z msweet $".
 //

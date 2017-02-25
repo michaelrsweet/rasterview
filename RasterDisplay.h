@@ -1,9 +1,9 @@
 //
-// "$Id: RasterDisplay.h 503 2011-05-19 04:13:21Z mike $"
+// "$Id: RasterDisplay.h 513 2015-08-26 21:23:30Z msweet $"
 //
 // CUPS raster file display widget header file.
 //
-// Copyright 2002-2011 by Michael Sweet.
+// Copyright 2002-2015 by Michael R Sweet.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 //
 
 #  include "raster.h"
+#  include <FL/Fl.H>
 #  include <FL/Fl_Group.H>
 #  include <FL/Fl_Scrollbar.H>
 
@@ -77,8 +78,12 @@ class RasterDisplay : public Fl_Group
   int			last_x_,	// Previous position (image coords)
 			last_y_;
 
+  uchar			device_colors_[15][3];
+					// CMY device colors
 
   static void	image_cb(void *p, int X, int Y, int W, uchar *D);
+  void		load_colors();
+  void		save_colors();
   static void	scrollbar_cb(Fl_Widget *w, void *d);
   void		update_mouse_xy();
   void		update_scrollbars();
@@ -95,11 +100,14 @@ class RasterDisplay : public Fl_Group
   int			bytes_per_color() const { return bpc_; }
   int			bytes_per_pixel() const { return bpp_; }
   int			close_file();
+  void			device_color(int n, Fl_Color c) { uchar r,g,b; Fl::get_color(c, r, g, b); device_colors_[n][0] = 255-r; device_colors_[n][1] = 255-g; device_colors_[n][2] = 255-b; save_colors();}
+  Fl_Color		device_color(int n) { return (fl_rgb_color(255-device_colors_[n][0], 255-device_colors_[n][1], 255-device_colors_[n][2])); }
   int			eof() const { return ras_eof_; }
-  int			handle(int event);
-  cups_page_header2_t	*header() { return &header_; }
   uchar			*get_color(int X, int Y);
   uchar			*get_pixel(int X, int Y);
+  int			handle(int event);
+  cups_page_header2_t	*header() { return &header_; }
+  int			is_subtractive();
   int			load_page();
   void			mode(int m) { mode_ = m; }
   int			mode() const { return mode_; }
@@ -120,5 +128,5 @@ class RasterDisplay : public Fl_Group
 #endif // !RasterDisplay_h
 
 //
-// End of "$Id: RasterDisplay.h 503 2011-05-19 04:13:21Z mike $".
+// End of "$Id: RasterDisplay.h 513 2015-08-26 21:23:30Z msweet $".
 //

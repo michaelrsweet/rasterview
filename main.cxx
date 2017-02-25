@@ -1,9 +1,9 @@
 //
-// "$Id: main.cxx 258 2006-09-25 20:40:56Z mike $"
+// "$Id: main.cxx 511 2015-08-26 01:48:51Z msweet $"
 //
 // Raster file viewer for CUPS.
 //
-// Copyright 1997-2006 by Michael R Sweet.
+// Copyright 1997-2015 by Michael R Sweet.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,10 +15,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// Contents:
-//
-//   main() - Main entry and processing...
-//
 
 //
 // Include necessary headers...
@@ -26,6 +22,7 @@
 
 #include "RasterView.h"
 #include <FL/Fl.H>
+#include <string.h>
 
 
 //
@@ -61,5 +58,5 @@ main(int  argc,				// I - Number of command-line arguments
 
 
 //
-// End of "$Id: main.cxx 258 2006-09-25 20:40:56Z mike $".
+// End of "$Id: main.cxx 511 2015-08-26 01:48:51Z msweet $".
 //

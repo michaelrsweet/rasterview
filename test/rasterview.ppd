@@ -1,10 +1,10 @@
 *PPD-Adobe: "4.3"
 *%
-*% "$Id$"
+*% "$Id: rasterview.ppd 510 2015-08-26 01:46:51Z msweet $"
 *%
 *% Test PPD file for the raster viewer.
 *%
-*% Copyright 2006 by Michael R Sweet
+*% Copyright 2006-2015 by Michael R Sweet
 *%
 *% This program is free software; you can redistribute it and/or modify
 *% it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 *%
 *FormatVersion:	"4.3"
 *FileVersion:	"1.1"
-*LanguageVersion: English 
+*LanguageVersion: English
 *LanguageEncoding: ISOLatin1
 *PCFileName:	"RASTVIEW.PPD"
 *Manufacturer:	"ESP"
@@ -29,7 +29,7 @@
 *cupsFilter:	"application/vnd.cups-raster 0 -"
 *ModelName:     "Raster Test Driver"
 *ShortNickName: "Raster Test Driver"
-*NickName:      "Raster Test Driver v1.2"
+*NickName:      "Raster Test Driver v1.4"
 *PSVersion:	"(3010.000) 81501"
 *LanguageLevel:	"3"
 *ColorDevice:	True
@@ -76,7 +76,7 @@
 *PageRegion EnvMonarch/Envelope Monarch: "<</PageSize[279 540]/ImagingBBox null>>setpagedevice"
 *CloseUI: *PageRegion
 
-*DefaultImageableArea: Letter 
+*DefaultImageableArea: Letter
 *ImageableArea Letter/US Letter:	"18 36 594 756"
 *ImageableArea Legal/US Legal:		"18 36 594 972"
 *ImageableArea Executive/US Executive:	"18 36 504 684"
@@ -161,6 +161,9 @@
 *ColorModel CIEXYZ: "<</cupsColorSpace 15>>setpagedevice"
 *ColorModel CIELab: "<</cupsColorSpace 16>>setpagedevice"
 *ColorModel RGBW: "<</cupsColorSpace 17>>setpagedevice"
+*ColorModel sW: "<</cupsColorSpace 18>>setpagedevice"
+*ColorModel sRGB: "<</cupsColorSpace 19>>setpagedevice"
+*ColorModel AdobeRGB: "<</cupsColorSpace 20>>setpagedevice"
 *ColorModel ICC1: "<</cupsColorSpace 32>>setpagedevice"
 *ColorModel ICC2: "<</cupsColorSpace 33>>setpagedevice"
 *ColorModel ICC3: "<</cupsColorSpace 34>>setpagedevice"
@@ -176,6 +179,21 @@
 *ColorModel ICCD: "<</cupsColorSpace 44>>setpagedevice"
 *ColorModel ICCE: "<</cupsColorSpace 45>>setpagedevice"
 *ColorModel ICCF: "<</cupsColorSpace 46>>setpagedevice"
+*ColorModel Device1: "<</cupsColorSpace 48>>setpagedevice"
+*ColorModel Device2: "<</cupsColorSpace 49>>setpagedevice"
+*ColorModel Device3: "<</cupsColorSpace 50>>setpagedevice"
+*ColorModel Device4: "<</cupsColorSpace 51>>setpagedevice"
+*ColorModel Device5: "<</cupsColorSpace 52>>setpagedevice"
+*ColorModel Device6: "<</cupsColorSpace 53>>setpagedevice"
+*ColorModel Device7: "<</cupsColorSpace 54>>setpagedevice"
+*ColorModel Device8: "<</cupsColorSpace 55>>setpagedevice"
+*ColorModel Device9: "<</cupsColorSpace 56>>setpagedevice"
+*ColorModel DeviceA: "<</cupsColorSpace 57>>setpagedevice"
+*ColorModel DeviceB: "<</cupsColorSpace 58>>setpagedevice"
+*ColorModel DeviceC: "<</cupsColorSpace 59>>setpagedevice"
+*ColorModel DeviceD: "<</cupsColorSpace 60>>setpagedevice"
+*ColorModel DeviceE: "<</cupsColorSpace 61>>setpagedevice"
+*ColorModel DeviceF: "<</cupsColorSpace 62>>setpagedevice"
 *CloseUI: *ColorModel
 
 *OpenUI *cupsBitsPerColor/Bits Per Color: PickOne
@@ -232,5 +250,5 @@
 *Font ZapfChancery-MediumItalic: Standard "(001.007S)" Standard ROM
 *Font ZapfDingbats: Special "(001.004S)" Standard ROM
 *%
-*% End of "$Id$".
+*% End of "$Id: rasterview.ppd 510 2015-08-26 01:46:51Z msweet $".
 *%
