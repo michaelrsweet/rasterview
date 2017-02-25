@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=RasterView
+Comment=CUPS Raster Viewer
+TryExec=rasterview
+Exec=rasterview %F
+Icon=rasterview.png
+Terminal=false
+Type=Application
+MimeType=application/vnd.cups-raster
+Encoding=UTF-8
+Categories=Graphics;

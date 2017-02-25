@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=MimeType
+MimeType=application/vnd.cups-raster
+Icon=rasterview.png
+Patterns=*.ras
+Name=CUPS Raster File
+Comment=CUPS Raster File
+Encoding=UTF-8

@@ -1,0 +1,73 @@
+README - 2011-05-18
+-------------------
+
+This file describes RasterView, a CUPS raster file viewing application. This
+program is provided under the terms version 2 of the GNU General Public License.
+
+More information can be found at:
+
+    http://www.easysw.com/~mike/rasterview/
+
+
+REQUIREMENTS
+
+You'll need CUPS 1.2 or higher installed to use RasterView.  If you plan on
+(re)compiling it, you'll also need FLTK 1.1.x or 1.3.x (http://www.fltk.org/)
+and a C++ compiler.
+
+
+HOW TO COMPILE
+
+Run the following commands:
+
+    ./configure
+    make
+
+
+HOW TO USE
+
+The program is called "rasterview" on UNIX/Linux and "RasterView.app" on Mac OS
+X.  Run the program and then open a raster file, or pass the filename on the
+command-line.  You can view multiple files simultaneously.
+
+The "test" subdirectory includes a script for generating raster data using the
+standard RIP filters.  Run the following command for help:
+
+    tools/maketestfiles.sh help
+
+
+CHANGES IN V1.3 - 2011-05-18
+
+	- Added support for PWG Raster files (requires CUPS 1.5 or higher)
+
+
+CHANGES IN V1.2.2 - 2007-06-21
+
+	- Added range checks to the page reader so that pages larger than 64MB
+	  or with invalid dimensions will not cause the program to crash.
+
+
+CHANGES IN V1.2.1 - 2006-09-28
+
+	- Changed the default scheme to gtk+, which is available in FLTK 1.1.8
+	  and higher.
+	- Added a --enable-static configure option to use the static CUPS
+	  libraries.
+
+
+CHANGES IN V1.2 - 2006-05-13
+
+	- First public release.
+
+
+LEGAL STUFF
+
+RasterView is Copyright 2002-2011 by Michael R Sweet.
+
+This program is free software; you can redistribute it and/or modify it under
+the terms of version 2 of the GNU General Public License as published by the
+Free Software Foundation.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.  See the GNU General Public License for more details.

@@ -1,0 +1,163 @@
+#
+# "$Id: Makefile.in 504 2011-05-19 04:58:10Z mike $"
+#
+# Makefile for rasterview, a CUPS/PWG Raster viewing program.
+#
+# Copyright 2002-2011 by Michael R Sweet
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License v2 as published
+# by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+
+
+# Installation directories
+prefix		=	@prefix@
+exec_prefix	=	@exec_prefix@
+bindir		=	@bindir@
+datadir		=	@datadir@
+datarootdir	=	@datarootdir@
+desktopdir	=	@desktopdir@
+
+
+# Compiler definitions...
+CC		=	@CC@
+CFLAGS		=	@CPPFLAGS@ @CFLAGS@ @DEFS@
+CP		=	@CP@
+CXX		=	@CXX@
+CXXFLAGS	=	@CPPFLAGS@ @CXXFLAGS@ @DEFS@
+FLTKCONFIG	=	@FLTKCONFIG@
+LDFLAGS		=	@LDFLAGS@
+LIBS		=	@LIBS@
+MKDIR		=	@MKDIR@ -p
+RM		=	@RM@ -f
+SHELL		=	/bin/sh
+
+
+# Rules for compiling...
+.SUFFIXES:	.c .cxx .o
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+.cxx.o:
+	$(CXX) $(CXXFLAGS) -c $<
+
+
+# Objects...
+RVOBJS		=	\
+			RasterDisplay.o \
+			RasterView.o \
+			error.o \
+			raster.o \
+			main.o
+OBJS		=	\
+			$(RVOBJS) \
+			testcie.o
+
+
+# Standard install targets...
+all:	rasterview testcie
+
+
+clean:
+	$(RM) rasterview
+	$(RM) $(OBJS)
+	$(RM) *.bck
+	$(RM) *~
+
+
+depend:
+	makedepend -Y -f .depend $(OBJS:.o=.cxx)
+
+
+distclean:	clean
+	$(RM) -r autom4te*
+	$(RM) config.*
+	$(RM) Makefile
+
+
+install: all @INSTALLDESKTOP@
+	$(MKDIR) $(BUILDROOT)$(bindir)
+	cp rasterview $(BUILDROOT)$(bindir)
+
+
+install-desktop:
+	$(MKDIR) $(BUILDROOT)$(desktopdir)/Development
+	cp rasterview.desktop $(BUILDROOT)$(desktopdir)/Development
+	$(MKDIR) $(BUILDROOT)$(datadir)/mimelnk/application
+	cp vnd.cups-raster.desktop $(BUILDROOT)$(datadir)/mimelnk/application
+	$(MKDIR) $(BUILDROOT)$(datadir)/mimelnk/image
+	cp pwg-raster.desktop $(BUILDROOT)$(datadir)/mimelnk/image
+	$(MKDIR) $(BUILDROOT)$(datadir)/icons/hicolor/32x32/apps
+	cp rasterview-32.png $(BUILDROOT)$(datadir)/icons/hicolor/32x32/apps/rasterview.png
+	$(MKDIR) $(BUILDROOT)$(datadir)/icons/hicolor/48x48/apps
+	cp rasterview-48.png $(BUILDROOT)$(datadir)/icons/hicolor/48x48/apps/rasterview.png
+	$(MKDIR) $(BUILDROOT)$(datadir)/icons/hicolor/128x128/apps
+	cp rasterview-128.png $(BUILDROOT)$(datadir)/icons/hicolor/128x128/apps/rasterview.png
+
+
+uninstall: @UNINSTALLDESKTOP@
+	$(RM) $(BUILDROOT)$(bindir)/rasterview
+
+
+uninstall-desktop:
+	$(RM) $(desktopdir)/Graphics/rasterview.desktop
+	$(RM) $(datadir)/mimelnk/application/vnd.cups-raster.desktop
+	$(RM) $(datadir)/mimelnk/image/pwg-raster.desktop
+	$(RM) $(datadir)/icons/hicolor/32x32/apps/rasterview.png
+	$(RM) $(datadir)/icons/hicolor/48x48/apps/rasterview.png
+	$(RM) $(datadir)/icons/hicolor/128x128/apps/rasterview.png
+
+
+# Make a disk image with the compiled program on MacOS X...
+VERSION	=	@VERSION@
+
+dmg:
+	rm -f rasterview-$(VERSION).dmg
+	hdiutil create -srcfolder RasterView.app rasterview-$(VERSION).dmg
+
+
+# Make an RPM for Linux...
+rpm:
+	epm -v -f rpm -nsm --output-dir dist rasterview
+	mv dist/*.rpm .
+	rm -rf dist
+
+
+# Build the rasterview program...
+rasterview:	$(RVOBJS) Makefile
+	$(CXX) $(LDFLAGS) -o $@ $(RVOBJS) $(LIBS)
+	$(CP) rasterview RasterView.app/Contents/MacOS
+
+$(RVOBJS):	RasterView.h RasterDisplay.h
+
+
+# Build the CIE test program...
+testcie:	testcie.o Makefile
+	$(CC) $(LDFLAGS) -o $@ testcie.o -lm
+
+
+$(OBJS):	Makefile
+
+
+# autoconf stuff...
+Makefile: configure Makefile.in
+	if test -f config.status; then \
+		./config.status --recheck; \
+		./config.status; \
+	else \
+		./configure; \
+	fi
+
+
+# Include dependencies...
+include .depend
+
+
+#
+# End of "$Id: Makefile.in 504 2011-05-19 04:58:10Z mike $".
+#
