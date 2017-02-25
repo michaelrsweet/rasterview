@@ -1,5 +1,5 @@
 /*
- * "$Id: raster.c 509 2015-08-25 21:32:16Z msweet $"
+ * "$Id: raster.c 521 2015-08-27 18:34:36Z msweet $"
  *
  * Raster file routines for CUPS.
  *
@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <netinet/in.h>
 #define DEBUG_printf(x)
 #define DEBUG_puts(x)
 extern void		_cupsRasterAddError(const char *f, ...);
@@ -598,11 +599,11 @@ cupsRasterWriteHeader(
 
     memset(&fh, 0, sizeof(fh));
 
-    strlcpy(fh.MediaClass, "PwgRaster", sizeof(fh.MediaClass));
+    strncpy(fh.MediaClass, "PwgRaster", sizeof(fh.MediaClass) - 1);
 					/* PwgRaster */
-    strlcpy(fh.MediaColor, r->header.MediaColor, sizeof(fh.MediaColor));
-    strlcpy(fh.MediaType, r->header.MediaType, sizeof(fh.MediaType));
-    strlcpy(fh.OutputType, r->header.OutputType, sizeof(fh.OutputType));
+    strncpy(fh.MediaColor, r->header.MediaColor, sizeof(fh.MediaColor) - 1);
+    strncpy(fh.MediaType, r->header.MediaType, sizeof(fh.MediaType) - 1);
+    strncpy(fh.OutputType, r->header.OutputType, sizeof(fh.OutputType) - 1);
 					/* PrintContentType */
 
     fh.CutMedia              = htonl(r->header.CutMedia);
@@ -660,10 +661,10 @@ cupsRasterWriteHeader(
     memcpy(dst, src, sizeof(fh.cupsReal) + sizeof(fh.cupsString));
 					/* VendorData */
 
-    strlcpy(fh.cupsRenderingIntent, r->header.cupsRenderingIntent,
-            sizeof(fh.cupsRenderingIntent));
-    strlcpy(fh.cupsPageSizeName, r->header.cupsPageSizeName,
-            sizeof(fh.cupsPageSizeName));
+    strncpy(fh.cupsRenderingIntent, r->header.cupsRenderingIntent,
+            sizeof(fh.cupsRenderingIntent) - 1);
+    strncpy(fh.cupsPageSizeName, r->header.cupsPageSizeName,
+            sizeof(fh.cupsPageSizeName) - 1);
 
     return (cups_raster_io(r, (unsigned char *)&fh, sizeof(fh)) == sizeof(fh));
   }
@@ -713,14 +714,14 @@ cupsRasterWriteHeader2(
     cups_page_header2_t	fh;		/* File page header */
 
     memset(&fh, 0, sizeof(fh));
-    strlcpy(fh.MediaClass, "PwgRaster", sizeof(fh.MediaClass));
-    strlcpy(fh.MediaColor, r->header.MediaColor, sizeof(fh.MediaColor));
-    strlcpy(fh.MediaType, r->header.MediaType, sizeof(fh.MediaType));
-    strlcpy(fh.OutputType, r->header.OutputType, sizeof(fh.OutputType));
-    strlcpy(fh.cupsRenderingIntent, r->header.cupsRenderingIntent,
-            sizeof(fh.cupsRenderingIntent));
-    strlcpy(fh.cupsPageSizeName, r->header.cupsPageSizeName,
-            sizeof(fh.cupsPageSizeName));
+    strncpy(fh.MediaClass, "PwgRaster", sizeof(fh.MediaClass) - 1);
+    strncpy(fh.MediaColor, r->header.MediaColor, sizeof(fh.MediaColor) - 1);
+    strncpy(fh.MediaType, r->header.MediaType, sizeof(fh.MediaType) - 1);
+    strncpy(fh.OutputType, r->header.OutputType, sizeof(fh.OutputType) - 1);
+    strncpy(fh.cupsRenderingIntent, r->header.cupsRenderingIntent,
+            sizeof(fh.cupsRenderingIntent) - 1);
+    strncpy(fh.cupsPageSizeName, r->header.cupsPageSizeName,
+            sizeof(fh.cupsPageSizeName) - 1);
 
     fh.CutMedia              = htonl(r->header.CutMedia);
     fh.Duplex                = htonl(r->header.Duplex);
@@ -1561,5 +1562,5 @@ cups_write_fd(void          *ctx,	/* I - File descriptor pointer */
 
 
 /*
- * End of "$Id: raster.c 509 2015-08-25 21:32:16Z msweet $".
+ * End of "$Id: raster.c 521 2015-08-27 18:34:36Z msweet $".
  */

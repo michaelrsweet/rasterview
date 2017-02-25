@@ -8,10 +8,10 @@
 	<string>rasterview</string>
 
 	<key>CFBundleIdentifier</key>
-	<string>org.cups.rasterview</string>
+	<string>org.msweet.rasterview</string>
 
 	<key>CFBundleVersion</key>
-	<string>1.4</string>
+	<string>1.4.1</string>
 
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
@@ -35,10 +35,10 @@
 	<string>rasterview.icns</string>
 
 	<key>CFBundleShortVersionString</key>
-	<string>1.4</string>
+	<string>1.4.1</string>
 
 	<key>CFBundleGetInfoString</key>
-	<string>1.4, Copyright 2002-2015 by Michael R Sweet</string>
+	<string>1.4.1, Copyright 2002-2015 by Michael R Sweet</string>
 
 	<key>CFBundleDocumentTypes</key>
 	<array>

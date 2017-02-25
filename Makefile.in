@@ -1,9 +1,9 @@
 #
-# "$Id: Makefile.in 504 2011-05-19 04:58:10Z mike $"
+# "$Id: Makefile.in 519 2015-08-26 22:46:44Z msweet $"
 #
 # Makefile for rasterview, a CUPS/PWG Raster viewing program.
 #
-# Copyright 2002-2011 by Michael R Sweet
+# Copyright 2002-2015 by Michael R Sweet
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License v2 as published
@@ -116,13 +116,14 @@ uninstall-desktop:
 # Make a disk image with the compiled program on MacOS X...
 VERSION	=	@VERSION@
 
-dmg:
+dmg:	all
 	rm -f rasterview-$(VERSION).dmg
+	codesign -s "$(MAC_DEV_IDENTITY)" RasterView.app
 	hdiutil create -srcfolder RasterView.app rasterview-$(VERSION).dmg
 
 
 # Make an RPM for Linux...
-rpm:
+rpm:	all
 	epm -v -f rpm -nsm --output-dir dist rasterview
 	mv dist/*.rpm .
 	rm -rf dist
@@ -159,5 +160,5 @@ include .depend
 
 
 #
-# End of "$Id: Makefile.in 504 2011-05-19 04:58:10Z mike $".
+# End of "$Id: Makefile.in 519 2015-08-26 22:46:44Z msweet $".
 #

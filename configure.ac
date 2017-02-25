@@ -1,5 +1,5 @@
 #
-# "$Id: configure.ac 507 2015-08-25 20:37:22Z msweet $"
+# "$Id: configure.ac 520 2015-08-27 12:36:13Z msweet $"
 #
 # Configure script for rasterview, a CUPS/PWG Raster viewing program.
 #
@@ -18,7 +18,7 @@
 dnl We need at least autoconf 2.50...
 AC_PREREQ(2.60)
 
-AC_INIT([RasterView],[1.4],[https://www.msweet.org/bugs.php/rasterview],[rasterview],[https://www.msweet.org/projects.php/rasterview])
+AC_INIT([RasterView],[1.4.1],[https://www.msweet.org/bugs.php/rasterview],[rasterview],[https://www.msweet.org/projects.php/rasterview])
 
 dnl Version number...
 VERSION="AC_PACKAGE_VERSION"
@@ -115,5 +115,5 @@ dnl Output the makefile...
 AC_OUTPUT(Makefile rasterview.list)
 
 #
-# End of "$Id: configure.ac 507 2015-08-25 20:37:22Z msweet $".
+# End of "$Id: configure.ac 520 2015-08-27 12:36:13Z msweet $".
 #

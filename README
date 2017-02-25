@@ -1,4 +1,4 @@
-README - 2015-08-26
+README - 2015-08-27
 -------------------
 
 This file describes RasterView, a CUPS/PWG raster file viewing application. This
@@ -33,6 +33,11 @@ The "test" subdirectory includes a script for generating raster data using the
 standard RIP filters.  Run the following command for help:
 
     tools/maketestfiles.sh help
+
+
+CHANGES IN V1.4.1 - 2015-08-27
+
+	- Fixed the dependency on strlcpy.
 
 
 CHANGES IN V1.4 - 2015-08-26

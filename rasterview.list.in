@@ -1,5 +1,5 @@
 #
-# "$Id: rasterview.list.in 515 2015-08-26 22:04:34Z msweet $"
+# "$Id: rasterview.list.in 521 2015-08-27 18:34:36Z msweet $"
 #
 # EPM list file for rasterview, a CUPS/PWG Raster viewing program.
 #
@@ -31,8 +31,8 @@ EOF
 $prefix=@prefix@
 $exec_prefix=@exec_prefix@
 $bindir=@bindir@
-$datadir=@datadir@
 $datarootdir=@datarootdir@
+$datadir=@datadir@
 $desktopdir=@desktopdir@
 
 # Files...
@@ -57,5 +57,5 @@ d 0755 root sys $datadir/icons/hicolor/128x128/apps -
 f 0644 root sys $datadir/icons/hicolor/128x128/apps/rasterview.png rasterview-128.png
 
 #
-# End of "$Id: rasterview.list.in 515 2015-08-26 22:04:34Z msweet $".
+# End of "$Id: rasterview.list.in 521 2015-08-27 18:34:36Z msweet $".
 #
