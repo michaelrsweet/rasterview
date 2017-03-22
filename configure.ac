@@ -1,9 +1,7 @@
 #
-# "$Id: configure.ac 520 2015-08-27 12:36:13Z msweet $"
-#
 # Configure script for rasterview, a CUPS/PWG Raster viewing program.
 #
-# Copyright 2002-2015 by Michael Sweet
+# Copyright 2002-2017 by Michael R Sweet
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License v2 as published
@@ -18,7 +16,7 @@
 dnl We need at least autoconf 2.50...
 AC_PREREQ(2.60)
 
-AC_INIT([RasterView],[1.4.1],[https://www.msweet.org/bugs.php/rasterview],[rasterview],[https://www.msweet.org/projects.php/rasterview])
+AC_INIT([RasterView],[1.5],[https://github.com/michaelrsweet/rasterview/issues],[rasterview],[https://michaelrsweet.github.io/rasterview])
 
 dnl Version number...
 VERSION="AC_PACKAGE_VERSION"
@@ -113,7 +111,3 @@ AC_SUBST(UNINSTALLDESKTOP)
 
 dnl Output the makefile...
 AC_OUTPUT(Makefile rasterview.list)
-
-#
-# End of "$Id: configure.ac 520 2015-08-27 12:36:13Z msweet $".
-#

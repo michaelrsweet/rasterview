@@ -1,0 +1,9 @@
+*.o
+Makefile
+RasterView.app/Contents/MacOS/rasterview
+autom4te.cache/
+config.log
+config.status
+rasterview
+rasterview.list
+testcie
