@@ -1,9 +1,7 @@
 /*
- * "$Id: raster.c 521 2015-08-27 18:34:36Z msweet $"
- *
  * Raster file routines for CUPS.
  *
- * Copyright 2007-2015 by Apple Inc.
+ * Copyright 2007-2016 by Apple Inc.
  * Copyright 1997-2006 by Easy Software Products.
  *
  * This file is part of the CUPS Imaging library.
@@ -12,7 +10,7 @@
  * property of Apple Inc. and are protected by Federal copyright
  * law.  Distribution and use rights are outlined in the file "LICENSE.txt"
  * which should have been included with this file.  If this file is
- * file is missing or damaged, see the license at "http://www.cups.org/".
+ * missing or damaged, see the license at "http://www.cups.org/".
  *
  * This file is subject to the Apple OS-Developed Software exception.
  */
@@ -69,6 +67,7 @@ struct _cups_raster_s			/**** Raster stream data ****/
 #ifdef DEBUG
   size_t		iocount;	/* Number of bytes read/written */
 #endif /* DEBUG */
+  unsigned		apple_page_count;/* Apple raster page count */
 };
 
 
@@ -80,7 +79,7 @@ static ssize_t	cups_raster_io(cups_raster_t *r, unsigned char *buf, size_t bytes
 static unsigned	cups_raster_read_header(cups_raster_t *r);
 static ssize_t	cups_raster_read(cups_raster_t *r, unsigned char *buf,
 		                 size_t bytes);
-static void	cups_raster_update(cups_raster_t *r);
+static int	cups_raster_update(cups_raster_t *r);
 static ssize_t	cups_raster_write(cups_raster_t *r,
 		                  const unsigned char *pixels);
 static ssize_t	cups_read_fd(void *ctx, unsigned char *buf, size_t bytes);
@@ -109,6 +108,248 @@ cupsRasterClose(cups_raster_t *r)	/* I - Stream to close */
     free(r);
   }
 }
+
+
+#if 0
+/*
+ * 'cupsRasterInitPWGHeader()' - Initialize a page header for PWG Raster output.
+ *
+ * The "media" argument specifies the media to use.
+ *
+ * The "type" argument specifies a "pwg-raster-document-type-supported" value
+ * that controls the color space and bit depth of the raster data.
+ *
+ * The "xres" and "yres" arguments specify the raster resolution in dots per
+ * inch.
+ *
+ * The "sheet_back" argument specifies a "pwg-raster-document-sheet-back" value
+ * to apply for the back side of a page.  Pass @code NULL@ for the front side.
+ *
+ * @since CUPS 2.2/macOS 10.12@
+ */
+
+int					/* O - 1 on success, 0 on failure */
+cupsRasterInitPWGHeader(
+    cups_page_header2_t *h,		/* I - Page header */
+    pwg_media_t         *media,		/* I - PWG media information */
+    const char          *type,		/* I - PWG raster type string */
+    int                 xdpi,		/* I - Cross-feed direction (horizontal) resolution */
+    int                 ydpi,		/* I - Feed direction (vertical) resolution */
+    const char          *sides,		/* I - IPP "sides" option value */
+    const char          *sheet_back)	/* I - Transform for back side or @code NULL@ for none */
+{
+  if (!h || !media || !type || xdpi <= 0 || ydpi <= 0)
+  {
+    _cupsRasterAddError("%s", strerror(EINVAL));
+    return (0);
+  }
+
+ /*
+  * Initialize the page header...
+  */
+
+  memset(h, 0, sizeof(cups_page_header2_t));
+
+  strlcpy(h->cupsPageSizeName, media->pwg, sizeof(h->cupsPageSizeName));
+
+  h->PageSize[0] = (unsigned)(72 * media->width / 2540);
+  h->PageSize[1] = (unsigned)(72 * media->length / 2540);
+
+  /* This never gets written but is needed for some applications */
+  h->cupsPageSize[0] = 72.0f * media->width / 2540.0f;
+  h->cupsPageSize[1] = 72.0f * media->length / 2540.0f;
+
+  h->ImagingBoundingBox[2] = h->PageSize[0];
+  h->ImagingBoundingBox[3] = h->PageSize[1];
+
+  h->HWResolution[0] = (unsigned)xdpi;
+  h->HWResolution[1] = (unsigned)ydpi;
+
+  h->cupsWidth  = (unsigned)(media->width * xdpi / 2540);
+  h->cupsHeight = (unsigned)(media->length * ydpi / 2540);
+
+  if (h->cupsWidth > 0x00ffffff || h->cupsHeight > 0x00ffffff)
+  {
+    _cupsRasterAddError("Raster dimensions too large.");
+    return (0);
+  }
+
+  h->cupsInteger[CUPS_RASTER_PWG_ImageBoxRight]  = h->cupsWidth;
+  h->cupsInteger[CUPS_RASTER_PWG_ImageBoxBottom] = h->cupsHeight;
+
+ /*
+  * Colorspace and bytes per line...
+  */
+
+  if (!strcmp(type, "adobe-rgb_8"))
+  {
+    h->cupsBitsPerColor = 8;
+    h->cupsBitsPerPixel = 24;
+    h->cupsColorSpace   = CUPS_CSPACE_ADOBERGB;
+  }
+  else if (!strcmp(type, "adobe-rgb_16"))
+  {
+    h->cupsBitsPerColor = 16;
+    h->cupsBitsPerPixel = 48;
+    h->cupsColorSpace   = CUPS_CSPACE_ADOBERGB;
+  }
+  else if (!strcmp(type, "black_1"))
+  {
+    h->cupsBitsPerColor = 1;
+    h->cupsBitsPerPixel = 1;
+    h->cupsColorSpace   = CUPS_CSPACE_K;
+  }
+  else if (!strcmp(type, "black_8"))
+  {
+    h->cupsBitsPerColor = 8;
+    h->cupsBitsPerPixel = 8;
+    h->cupsColorSpace   = CUPS_CSPACE_K;
+  }
+  else if (!strcmp(type, "black_16"))
+  {
+    h->cupsBitsPerColor = 16;
+    h->cupsBitsPerPixel = 16;
+    h->cupsColorSpace   = CUPS_CSPACE_K;
+  }
+  else if (!strcmp(type, "cmyk_8"))
+  {
+    h->cupsBitsPerColor = 8;
+    h->cupsBitsPerPixel = 32;
+    h->cupsColorSpace   = CUPS_CSPACE_CMYK;
+  }
+  else if (!strcmp(type, "cmyk_16"))
+  {
+    h->cupsBitsPerColor = 16;
+    h->cupsBitsPerPixel = 64;
+    h->cupsColorSpace   = CUPS_CSPACE_CMYK;
+  }
+  else if (!strncmp(type, "device", 6) && type[6] >= '1' && type[6] <= '9')
+  {
+    int ncolors, bits;			/* Number of colors and bits */
+
+
+    if (sscanf(type, "device%d_%d", &ncolors, &bits) != 2 || ncolors > 15 || (bits != 8 && bits != 16))
+    {
+      _cupsRasterAddError("Unsupported raster type \'%s\'.", type);
+      return (0);
+    }
+
+    h->cupsBitsPerColor = (unsigned)bits;
+    h->cupsBitsPerPixel = (unsigned)(ncolors * bits);
+    h->cupsColorSpace   = (cups_cspace_t)(CUPS_CSPACE_DEVICE1 + ncolors - 1);
+  }
+  else if (!strcmp(type, "rgb_8"))
+  {
+    h->cupsBitsPerColor = 8;
+    h->cupsBitsPerPixel = 24;
+    h->cupsColorSpace   = CUPS_CSPACE_RGB;
+  }
+  else if (!strcmp(type, "rgb_16"))
+  {
+    h->cupsBitsPerColor = 16;
+    h->cupsBitsPerPixel = 48;
+    h->cupsColorSpace   = CUPS_CSPACE_RGB;
+  }
+  else if (!strcmp(type, "sgray_1"))
+  {
+    h->cupsBitsPerColor = 1;
+    h->cupsBitsPerPixel = 1;
+    h->cupsColorSpace   = CUPS_CSPACE_SW;
+  }
+  else if (!strcmp(type, "sgray_8"))
+  {
+    h->cupsBitsPerColor = 8;
+    h->cupsBitsPerPixel = 8;
+    h->cupsColorSpace   = CUPS_CSPACE_SW;
+  }
+  else if (!strcmp(type, "sgray_16"))
+  {
+    h->cupsBitsPerColor = 16;
+    h->cupsBitsPerPixel = 16;
+    h->cupsColorSpace   = CUPS_CSPACE_SW;
+  }
+  else if (!strcmp(type, "srgb_8"))
+  {
+    h->cupsBitsPerColor = 8;
+    h->cupsBitsPerPixel = 24;
+    h->cupsColorSpace   = CUPS_CSPACE_SRGB;
+  }
+  else if (!strcmp(type, "srgb_16"))
+  {
+    h->cupsBitsPerColor = 16;
+    h->cupsBitsPerPixel = 48;
+    h->cupsColorSpace   = CUPS_CSPACE_SRGB;
+  }
+  else
+  {
+    _cupsRasterAddError("Unsupported raster type \'%s\'.", type);
+    return (0);
+  }
+
+  h->cupsColorOrder   = CUPS_ORDER_CHUNKED;
+  h->cupsNumColors    = h->cupsBitsPerPixel / h->cupsBitsPerColor;
+  h->cupsBytesPerLine = (h->cupsWidth * h->cupsBitsPerPixel + 7) / 8;
+
+ /*
+  * Duplex support...
+  */
+
+  h->cupsInteger[CUPS_RASTER_PWG_CrossFeedTransform] = 1;
+  h->cupsInteger[CUPS_RASTER_PWG_FeedTransform]      = 1;
+
+  if (sides)
+  {
+    if (!strcmp(sides, "two-sided-long-edge"))
+    {
+      h->Duplex = 1;
+    }
+    else if (!strcmp(sides, "two-sided-short-edge"))
+    {
+      h->Duplex = 1;
+      h->Tumble = 1;
+    }
+    else if (strcmp(sides, "one-sided"))
+    {
+      _cupsRasterAddError("Unsupported sides value \'%s\'.", sides);
+      return (0);
+    }
+
+    if (sheet_back)
+    {
+      if (!strcmp(sheet_back, "flipped"))
+      {
+        if (h->Tumble)
+          h->cupsInteger[CUPS_RASTER_PWG_CrossFeedTransform] = 0xffffffffU;
+        else
+          h->cupsInteger[CUPS_RASTER_PWG_FeedTransform] = 0xffffffffU;
+      }
+      else if (!strcmp(sheet_back, "manual-tumble"))
+      {
+        if (h->Tumble)
+        {
+          h->cupsInteger[CUPS_RASTER_PWG_CrossFeedTransform] = 0xffffffffU;
+          h->cupsInteger[CUPS_RASTER_PWG_FeedTransform]      = 0xffffffffU;
+        }
+      }
+      else if (!strcmp(sheet_back, "rotated"))
+      {
+        if (!h->Tumble)
+        {
+          h->cupsInteger[CUPS_RASTER_PWG_CrossFeedTransform] = 0xffffffffU;
+          h->cupsInteger[CUPS_RASTER_PWG_FeedTransform]      = 0xffffffffU;
+        }
+      }
+      else if (strcmp(sheet_back, "normal"))
+      {
+	_cupsRasterAddError("Unsupported sheet_back value \'%s\'.", sheet_back);
+	return (0);
+      }
+    }
+  }
+
+  return (1);
+}
+#endif /* 0 */
 
 
 /*
@@ -196,7 +437,9 @@ cupsRasterOpenIO(
         r->sync != CUPS_RASTER_SYNCv1 &&
         r->sync != CUPS_RASTER_REVSYNCv1 &&
         r->sync != CUPS_RASTER_SYNCv2 &&
-        r->sync != CUPS_RASTER_REVSYNCv2)
+        r->sync != CUPS_RASTER_REVSYNCv2 &&
+        r->sync != CUPS_RASTER_SYNCapple &&
+        r->sync != CUPS_RASTER_REVSYNCapple)
     {
       _cupsRasterAddError("Unknown raster format %08x!\n", r->sync);
       free(r);
@@ -204,13 +447,32 @@ cupsRasterOpenIO(
     }
 
     if (r->sync == CUPS_RASTER_SYNCv2 ||
-        r->sync == CUPS_RASTER_REVSYNCv2)
+        r->sync == CUPS_RASTER_REVSYNCv2 ||
+        r->sync == CUPS_RASTER_SYNCapple ||
+        r->sync == CUPS_RASTER_REVSYNCapple)
       r->compressed = 1;
 
     if (r->sync == CUPS_RASTER_REVSYNC ||
         r->sync == CUPS_RASTER_REVSYNCv1 ||
-        r->sync == CUPS_RASTER_REVSYNCv2)
+        r->sync == CUPS_RASTER_REVSYNCv2 ||
+        r->sync == CUPS_RASTER_REVSYNCapple)
       r->swapped = 1;
+
+    if (r->sync == CUPS_RASTER_SYNCapple ||
+        r->sync == CUPS_RASTER_REVSYNCapple)
+    {
+      unsigned char	header[8];	/* File header */
+
+      if (cups_raster_io(r, (unsigned char *)header, sizeof(header)) !=
+	      sizeof(header))
+      {
+	_cupsRasterAddError("Unable to read header from raster stream: %s\n",
+			    strerror(errno));
+	free(r);
+	return (NULL);
+      }
+
+    }
 
     DEBUG_printf(("1cupsRasterOpenIO: r->swapped=%d, r->sync=%08x\n", r->swapped, r->sync));
   }
@@ -236,6 +498,13 @@ cupsRasterOpenIO(
           r->compressed = 1;
           r->sync       = htonl(CUPS_RASTER_SYNC_PWG);
           r->swapped    = r->sync != CUPS_RASTER_SYNC_PWG;
+	  break;
+
+      case CUPS_RASTER_WRITE_APPLE :
+          r->compressed     = 1;
+          r->sync           = htonl(CUPS_RASTER_SYNCapple);
+          r->swapped        = r->sync != CUPS_RASTER_SYNCapple;
+          r->apple_page_count = 0xffffffffU;
 	  break;
     }
 
@@ -294,7 +563,7 @@ cupsRasterReadHeader(
  * 'cupsRasterReadHeader2()' - Read a raster page header and store it in a
  *                             version 2 page header structure.
  *
- * @since CUPS 1.2/OS X 10.5@
+ * @since CUPS 1.2/macOS 10.5@
  */
 
 unsigned				/* O - 1 on success, 0 on failure/end-of-file */
@@ -306,7 +575,7 @@ cupsRasterReadHeader2(
   * Get the raster header...
   */
 
-  DEBUG_printf(("cupsRasterReadHeader2(r=%p, h=%p)", r, h));
+  DEBUG_printf(("cupsRasterReadHeader2(r=%p, h=%p)", (void *)r, (void *)h));
 
   if (!cups_raster_read_header(r))
   {
@@ -346,7 +615,7 @@ cupsRasterReadPixels(cups_raster_t *r,	/* I - Raster stream */
   unsigned	count;			/* Repetition count */
 
 
-  DEBUG_printf(("cupsRasterReadPixels(r=%p, p=%p, len=%u)", r, p, len));
+  DEBUG_printf(("cupsRasterReadPixels(r=%p, p=%p, len=%u)", (void *)r, (void *)p, len));
 
   if (r == NULL || r->mode != CUPS_RASTER_READ || r->remaining == 0 ||
       r->header.cupsBytesPerLine == 0)
@@ -440,7 +709,31 @@ cupsRasterReadPixels(cups_raster_t *r,	/* I - Raster stream */
 	  return (0);
 	}
 
-	if (byte & 128)
+        if (byte == 128)
+        {
+         /*
+          * Clear to end of line...
+          */
+
+          switch (r->header.cupsColorSpace)
+          {
+            case CUPS_CSPACE_W :
+            case CUPS_CSPACE_RGB :
+            case CUPS_CSPACE_SW :
+            case CUPS_CSPACE_SRGB :
+            case CUPS_CSPACE_RGBW :
+            case CUPS_CSPACE_ADOBERGB :
+                memset(temp, 0xff, (size_t)bytes);
+                break;
+            default :
+                memset(temp, 0x00, (size_t)bytes);
+                break;
+          }
+
+          temp += bytes;
+          bytes = 0;
+        }
+	else if (byte & 128)
 	{
 	 /*
 	  * Copy N literal pixels...
@@ -458,7 +751,7 @@ cupsRasterReadPixels(cups_raster_t *r,	/* I - Raster stream */
 	  }
 
 	  temp  += count;
-	  bytes -= count;
+	  bytes -= (ssize_t)count;
 	}
 	else
 	{
@@ -473,7 +766,7 @@ cupsRasterReadPixels(cups_raster_t *r,	/* I - Raster stream */
           if (count < r->bpp)
 	    break;
 
-	  bytes -= count;
+	  bytes -= (ssize_t)count;
 
           if (!cups_raster_read(r, temp, r->bpp))
 	  {
@@ -582,7 +875,8 @@ cupsRasterWriteHeader(
   memset(&(r->header), 0, sizeof(r->header));
   memcpy(&(r->header), h, sizeof(cups_page_header_t));
 
-  cups_raster_update(r);
+  if (!cups_raster_update(r))
+    return (0);
 
  /*
   * Write the raster header...
@@ -599,11 +893,11 @@ cupsRasterWriteHeader(
 
     memset(&fh, 0, sizeof(fh));
 
-    strncpy(fh.MediaClass, "PwgRaster", sizeof(fh.MediaClass) - 1);
+    strlcpy(fh.MediaClass, "PwgRaster", sizeof(fh.MediaClass));
 					/* PwgRaster */
-    strncpy(fh.MediaColor, r->header.MediaColor, sizeof(fh.MediaColor) - 1);
-    strncpy(fh.MediaType, r->header.MediaType, sizeof(fh.MediaType) - 1);
-    strncpy(fh.OutputType, r->header.OutputType, sizeof(fh.OutputType) - 1);
+    strlcpy(fh.MediaColor, r->header.MediaColor, sizeof(fh.MediaColor));
+    strlcpy(fh.MediaType, r->header.MediaType, sizeof(fh.MediaType));
+    strlcpy(fh.OutputType, r->header.OutputType, sizeof(fh.OutputType));
 					/* PrintContentType */
 
     fh.CutMedia              = htonl(r->header.CutMedia);
@@ -661,12 +955,66 @@ cupsRasterWriteHeader(
     memcpy(dst, src, sizeof(fh.cupsReal) + sizeof(fh.cupsString));
 					/* VendorData */
 
-    strncpy(fh.cupsRenderingIntent, r->header.cupsRenderingIntent,
-            sizeof(fh.cupsRenderingIntent) - 1);
-    strncpy(fh.cupsPageSizeName, r->header.cupsPageSizeName,
-            sizeof(fh.cupsPageSizeName) - 1);
+    strlcpy(fh.cupsRenderingIntent, r->header.cupsRenderingIntent,
+            sizeof(fh.cupsRenderingIntent));
+    strlcpy(fh.cupsPageSizeName, r->header.cupsPageSizeName,
+            sizeof(fh.cupsPageSizeName));
 
     return (cups_raster_io(r, (unsigned char *)&fh, sizeof(fh)) == sizeof(fh));
+  }
+  else if (r->mode == CUPS_RASTER_WRITE_APPLE)
+  {
+   /*
+    * Raw raster data is always network byte order with most of the page header
+    * zeroed.
+    */
+
+    unsigned char appleheader[32];	/* Raw page header */
+
+    if (r->apple_page_count == 0xffffffffU)
+    {
+     /*
+      * Write raw page count from raster page header...
+      */
+
+      r->apple_page_count = r->header.cupsInteger[0];
+
+      appleheader[0] = 'A';
+      appleheader[1] = 'S';
+      appleheader[2] = 'T';
+      appleheader[3] = 0;
+      appleheader[4] = (unsigned char)(r->apple_page_count >> 24);
+      appleheader[5] = (unsigned char)(r->apple_page_count >> 16);
+      appleheader[6] = (unsigned char)(r->apple_page_count >> 8);
+      appleheader[7] = (unsigned char)(r->apple_page_count);
+
+      if (cups_raster_io(r, appleheader, 8) != 8)
+        return (0);
+    }
+
+    memset(appleheader, 0, sizeof(appleheader));
+
+    appleheader[0]  = (unsigned char)r->header.cupsBitsPerPixel;
+    appleheader[1]  = r->header.cupsColorSpace == CUPS_CSPACE_SRGB ? 1 :
+                        r->header.cupsColorSpace == CUPS_CSPACE_RGBW ? 2 :
+                        r->header.cupsColorSpace == CUPS_CSPACE_ADOBERGB ? 3 :
+                        r->header.cupsColorSpace == CUPS_CSPACE_W ? 4 :
+                        r->header.cupsColorSpace == CUPS_CSPACE_RGB ? 5 :
+                        r->header.cupsColorSpace == CUPS_CSPACE_CMYK ? 6 : 0;
+    appleheader[12] = (unsigned char)(r->header.cupsWidth >> 24);
+    appleheader[13] = (unsigned char)(r->header.cupsWidth >> 16);
+    appleheader[14] = (unsigned char)(r->header.cupsWidth >> 8);
+    appleheader[15] = (unsigned char)(r->header.cupsWidth);
+    appleheader[16] = (unsigned char)(r->header.cupsHeight >> 24);
+    appleheader[17] = (unsigned char)(r->header.cupsHeight >> 16);
+    appleheader[18] = (unsigned char)(r->header.cupsHeight >> 8);
+    appleheader[19] = (unsigned char)(r->header.cupsHeight);
+    appleheader[20] = (unsigned char)(r->header.HWResolution[0] >> 24);
+    appleheader[21] = (unsigned char)(r->header.HWResolution[0] >> 16);
+    appleheader[22] = (unsigned char)(r->header.HWResolution[0] >> 8);
+    appleheader[23] = (unsigned char)(r->header.HWResolution[0]);
+
+    return (cups_raster_io(r, appleheader, sizeof(appleheader)) == sizeof(appleheader));
   }
   else
     return (cups_raster_io(r, (unsigned char *)&(r->header), sizeof(r->header))
@@ -680,7 +1028,7 @@ cupsRasterWriteHeader(
  *
  * The page header can be initialized using @link cupsRasterInterpretPPD@.
  *
- * @since CUPS 1.2/OS X 10.5@
+ * @since CUPS 1.2/macOS 10.5@
  */
 
 unsigned				/* O - 1 on success, 0 on failure */
@@ -698,7 +1046,8 @@ cupsRasterWriteHeader2(
 
   memcpy(&(r->header), h, sizeof(cups_page_header2_t));
 
-  cups_raster_update(r);
+  if (!cups_raster_update(r))
+    return (0);
 
  /*
   * Write the raster header...
@@ -714,14 +1063,14 @@ cupsRasterWriteHeader2(
     cups_page_header2_t	fh;		/* File page header */
 
     memset(&fh, 0, sizeof(fh));
-    strncpy(fh.MediaClass, "PwgRaster", sizeof(fh.MediaClass) - 1);
-    strncpy(fh.MediaColor, r->header.MediaColor, sizeof(fh.MediaColor) - 1);
-    strncpy(fh.MediaType, r->header.MediaType, sizeof(fh.MediaType) - 1);
-    strncpy(fh.OutputType, r->header.OutputType, sizeof(fh.OutputType) - 1);
-    strncpy(fh.cupsRenderingIntent, r->header.cupsRenderingIntent,
-            sizeof(fh.cupsRenderingIntent) - 1);
-    strncpy(fh.cupsPageSizeName, r->header.cupsPageSizeName,
-            sizeof(fh.cupsPageSizeName) - 1);
+    strlcpy(fh.MediaClass, "PwgRaster", sizeof(fh.MediaClass));
+    strlcpy(fh.MediaColor, r->header.MediaColor, sizeof(fh.MediaColor));
+    strlcpy(fh.MediaType, r->header.MediaType, sizeof(fh.MediaType));
+    strlcpy(fh.OutputType, r->header.OutputType, sizeof(fh.OutputType));
+    strlcpy(fh.cupsRenderingIntent, r->header.cupsRenderingIntent,
+            sizeof(fh.cupsRenderingIntent));
+    strlcpy(fh.cupsPageSizeName, r->header.cupsPageSizeName,
+            sizeof(fh.cupsPageSizeName));
 
     fh.CutMedia              = htonl(r->header.CutMedia);
     fh.Duplex                = htonl(r->header.Duplex);
@@ -761,6 +1110,60 @@ cupsRasterWriteHeader2(
 
     return (cups_raster_io(r, (unsigned char *)&fh, sizeof(fh)) == sizeof(fh));
   }
+  else if (r->mode == CUPS_RASTER_WRITE_APPLE)
+  {
+   /*
+    * Raw raster data is always network byte order with most of the page header
+    * zeroed.
+    */
+
+    unsigned char appleheader[32];	/* Raw page header */
+
+    if (r->apple_page_count == 0xffffffffU)
+    {
+     /*
+      * Write raw page count from raster page header...
+      */
+
+      r->apple_page_count = r->header.cupsInteger[0];
+
+      appleheader[0] = 'A';
+      appleheader[1] = 'S';
+      appleheader[2] = 'T';
+      appleheader[3] = 0;
+      appleheader[4] = (unsigned char)(r->apple_page_count >> 24);
+      appleheader[5] = (unsigned char)(r->apple_page_count >> 16);
+      appleheader[6] = (unsigned char)(r->apple_page_count >> 8);
+      appleheader[7] = (unsigned char)(r->apple_page_count);
+
+      if (cups_raster_io(r, appleheader, 8) != 8)
+        return (0);
+    }
+
+    memset(appleheader, 0, sizeof(appleheader));
+
+    appleheader[0]  = (unsigned char)r->header.cupsBitsPerPixel;
+    appleheader[1]  = r->header.cupsColorSpace == CUPS_CSPACE_SRGB ? 1 :
+                        r->header.cupsColorSpace == CUPS_CSPACE_RGBW ? 2 :
+                        r->header.cupsColorSpace == CUPS_CSPACE_ADOBERGB ? 3 :
+                        r->header.cupsColorSpace == CUPS_CSPACE_W ? 4 :
+                        r->header.cupsColorSpace == CUPS_CSPACE_RGB ? 5 :
+                        r->header.cupsColorSpace == CUPS_CSPACE_CMYK ? 6 : 0;
+    appleheader[12] = (unsigned char)(r->header.cupsWidth >> 24);
+    appleheader[13] = (unsigned char)(r->header.cupsWidth >> 16);
+    appleheader[14] = (unsigned char)(r->header.cupsWidth >> 8);
+    appleheader[15] = (unsigned char)(r->header.cupsWidth);
+    appleheader[16] = (unsigned char)(r->header.cupsHeight >> 24);
+    appleheader[17] = (unsigned char)(r->header.cupsHeight >> 16);
+    appleheader[18] = (unsigned char)(r->header.cupsHeight >> 8);
+    appleheader[19] = (unsigned char)(r->header.cupsHeight);
+    appleheader[20] = (unsigned char)(r->header.HWResolution[0] >> 24);
+    appleheader[21] = (unsigned char)(r->header.HWResolution[0] >> 16);
+    appleheader[22] = (unsigned char)(r->header.HWResolution[0] >> 8);
+    appleheader[23] = (unsigned char)(r->header.HWResolution[0]);
+
+    return (cups_raster_io(r, appleheader, sizeof(appleheader)) == sizeof(appleheader));
+  }
   else
     return (cups_raster_io(r, (unsigned char *)&(r->header), sizeof(r->header))
 		== sizeof(r->header));
@@ -784,8 +1187,7 @@ cupsRasterWritePixels(cups_raster_t *r,	/* I - Raster stream */
   unsigned	remaining;		/* Bytes remaining */
 
 
-  DEBUG_printf(("cupsRasterWritePixels(r=%p, p=%p, len=%u), remaining=%u\n",
-		r, p, len, r->remaining));
+  DEBUG_printf(("cupsRasterWritePixels(r=%p, p=%p, len=%u), remaining=%u", (void *)r, (void *)p, len, r->remaining));
 
   if (r == NULL || r->mode == CUPS_RASTER_READ || r->remaining == 0)
     return (0);
@@ -971,71 +1373,137 @@ cups_raster_read_header(
   size_t	len;			/* Length for read/swap */
 
 
-  DEBUG_printf(("3cups_raster_read_header(r=%p), r->mode=%d", r, r ? r->mode : 0));
+  DEBUG_printf(("3cups_raster_read_header(r=%p), r->mode=%d", (void *)r, r ? r->mode : 0));
 
   if (r == NULL || r->mode != CUPS_RASTER_READ)
     return (0);
 
   DEBUG_printf(("4cups_raster_read_header: r->iocount=" CUPS_LLFMT, CUPS_LLCAST r->iocount));
 
- /*
-  * Get the length of the raster header...
-  */
-
-  if (r->sync == CUPS_RASTER_SYNCv1 || r->sync == CUPS_RASTER_REVSYNCv1)
-    len = sizeof(cups_page_header_t);
-  else
-    len = sizeof(cups_page_header2_t);
-
-  DEBUG_printf(("4cups_raster_read_header: len=%d", (int)len));
+  memset(&(r->header), 0, sizeof(r->header));
 
  /*
   * Read the header...
   */
 
-  memset(&(r->header), 0, sizeof(r->header));
-
-  if (cups_raster_read(r, (unsigned char *)&(r->header), len) < (ssize_t)len)
+  switch (r->sync)
   {
-    DEBUG_printf(("4cups_raster_read_header: EOF, r->iocount=" CUPS_LLFMT, CUPS_LLCAST r->iocount));
-    return (0);
-  }
+    default :
+       /*
+	* Get the length of the raster header...
+	*/
 
- /*
-  * Swap bytes as needed...
-  */
+	if (r->sync == CUPS_RASTER_SYNCv1 || r->sync == CUPS_RASTER_REVSYNCv1)
+	  len = sizeof(cups_page_header_t);
+	else
+	  len = sizeof(cups_page_header2_t);
 
-  if (r->swapped)
-  {
-    unsigned	*s,			/* Current word */
-		temp;			/* Temporary copy */
+	DEBUG_printf(("4cups_raster_read_header: len=%d", (int)len));
+
+       /*
+        * Read it...
+        */
+
+	if (cups_raster_read(r, (unsigned char *)&(r->header), len) < (ssize_t)len)
+	{
+	  DEBUG_printf(("4cups_raster_read_header: EOF, r->iocount=" CUPS_LLFMT, CUPS_LLCAST r->iocount));
+	  return (0);
+	}
+
+       /*
+	* Swap bytes as needed...
+	*/
+
+	if (r->swapped)
+	{
+	  unsigned	*s,		/* Current word */
+			temp;		/* Temporary copy */
 
 
-    DEBUG_puts("4cups_raster_read_header: Swapping header bytes.");
+	  DEBUG_puts("4cups_raster_read_header: Swapping header bytes.");
 
-    for (len = 81, s = &(r->header.AdvanceDistance);
-	 len > 0;
-	 len --, s ++)
-    {
-      temp = *s;
-      *s   = ((temp & 0xff) << 24) |
-             ((temp & 0xff00) << 8) |
-             ((temp & 0xff0000) >> 8) |
-             ((temp & 0xff000000) >> 24);
+	  for (len = 81, s = &(r->header.AdvanceDistance);
+	       len > 0;
+	       len --, s ++)
+	  {
+	    temp = *s;
+	    *s   = ((temp & 0xff) << 24) |
+		   ((temp & 0xff00) << 8) |
+		   ((temp & 0xff0000) >> 8) |
+		   ((temp & 0xff000000) >> 24);
 
-      DEBUG_printf(("4cups_raster_read_header: %08x => %08x", temp, *s));
-    }
+	    DEBUG_printf(("4cups_raster_read_header: %08x => %08x", temp, *s));
+	  }
+	}
+        break;
+
+    case CUPS_RASTER_SYNCapple :
+    case CUPS_RASTER_REVSYNCapple :
+        {
+          unsigned char	appleheader[32];	/* Raw header */
+          static const unsigned rawcspace[] =
+          {
+            CUPS_CSPACE_SW,
+            CUPS_CSPACE_SRGB,
+            CUPS_CSPACE_RGBW,
+            CUPS_CSPACE_ADOBERGB,
+            CUPS_CSPACE_W,
+            CUPS_CSPACE_RGB,
+            CUPS_CSPACE_CMYK
+          };
+          static const unsigned rawnumcolors[] =
+          {
+            1,
+            3,
+            4,
+            3,
+            1,
+            3,
+            4
+          };
+
+	  if (cups_raster_read(r, appleheader, sizeof(appleheader)) < (ssize_t)sizeof(appleheader))
+	  {
+	    DEBUG_printf(("4cups_raster_read_header: EOF, r->iocount=" CUPS_LLFMT, CUPS_LLCAST r->iocount));
+	    return (0);
+	  }
+
+	  strlcpy(r->header.MediaClass, "PwgRaster", sizeof(r->header.MediaClass));
+					      /* PwgRaster */
+          r->header.cupsBitsPerPixel = appleheader[0];
+          r->header.cupsColorSpace   = appleheader[1] >= (sizeof(rawcspace) / sizeof(rawcspace[0])) ? CUPS_CSPACE_DEVICE1 : rawcspace[appleheader[1]];
+          r->header.cupsNumColors    = appleheader[1] >= (sizeof(rawnumcolors) / sizeof(rawnumcolors[0])) ? 1 : rawnumcolors[appleheader[1]];
+          r->header.cupsBitsPerColor = r->header.cupsBitsPerPixel / r->header.cupsNumColors;
+          r->header.cupsWidth        = ((((((unsigned)appleheader[12] << 8) | (unsigned)appleheader[13]) << 8) | (unsigned)appleheader[14]) << 8) | (unsigned)appleheader[15];
+          r->header.cupsHeight       = ((((((unsigned)appleheader[16] << 8) | (unsigned)appleheader[17]) << 8) | (unsigned)appleheader[18]) << 8) | (unsigned)appleheader[19];
+          r->header.cupsBytesPerLine = r->header.cupsWidth * r->header.cupsBitsPerPixel / 8;
+          r->header.cupsColorOrder   = CUPS_ORDER_CHUNKED;
+          r->header.HWResolution[0]  = r->header.HWResolution[1] = ((((((unsigned)appleheader[20] << 8) | (unsigned)appleheader[21]) << 8) | (unsigned)appleheader[22]) << 8) | (unsigned)appleheader[23];
+
+          if (r->header.HWResolution[0] > 0)
+          {
+	    r->header.PageSize[0]     = (unsigned)(r->header.cupsWidth * 72 / r->header.HWResolution[0]);
+	    r->header.PageSize[1]     = (unsigned)(r->header.cupsHeight * 72 / r->header.HWResolution[1]);
+	    r->header.cupsPageSize[0] = (float)(r->header.cupsWidth * 72.0 / r->header.HWResolution[0]);
+	    r->header.cupsPageSize[1] = (float)(r->header.cupsHeight * 72.0 / r->header.HWResolution[1]);
+          }
+
+          r->header.cupsInteger[0] = r->apple_page_count;
+          r->header.cupsInteger[7] = 0xffffff;
+        }
+        break;
   }
 
  /*
   * Update the header and row count...
   */
 
-  cups_raster_update(r);
+  if (!cups_raster_update(r))
+    return (0);
 
   DEBUG_printf(("4cups_raster_read_header: cupsBitsPerPixel=%u, cupsBitsPerColor=%u, cupsBytesPerLine=%u, cupsWidth=%u, cupsHeight=%u, r->bpp=%d", r->header.cupsBitsPerPixel, r->header.cupsBitsPerColor, r->header.cupsBytesPerLine, r->header.cupsWidth, r->header.cupsHeight, r->bpp));
 
-  return (r->header.cupsBitsPerPixel != 0 && r->header.cupsBitsPerColor != 0 && r->header.cupsBytesPerLine != 0 && r->header.cupsHeight != 0 && (r->header.cupsBytesPerLine % r->bpp) == 0);
+  return (r->header.cupsBitsPerPixel > 0 && r->header.cupsBitsPerPixel <= 240 && r->header.cupsBitsPerColor > 0 && r->header.cupsBitsPerColor <= 16 && r->header.cupsBytesPerLine > 0 && r->header.cupsBytesPerLine <= 0x7fffffff && r->header.cupsHeight != 0 && (r->header.cupsBytesPerLine % r->bpp) == 0);
 }
 
 
@@ -1052,7 +1520,7 @@ cups_raster_io(cups_raster_t *r,	/* I - Raster stream */
 		total;			/* Total bytes read/written */
 
 
-  DEBUG_printf(("5cups_raster_io(r=%p, buf=%p, bytes=" CUPS_LLFMT ")", r, buf, CUPS_LLCAST bytes));
+  DEBUG_printf(("5cups_raster_io(r=%p, buf=%p, bytes=" CUPS_LLFMT ")", (void *)r, (void *)buf, CUPS_LLCAST bytes));
 
   for (total = 0; total < (ssize_t)bytes; total += count, buf += count)
   {
@@ -1095,7 +1563,7 @@ cups_raster_read(cups_raster_t *r,	/* I - Raster stream */
 		total;			/* Total bytes read */
 
 
-  DEBUG_printf(("5cups_raster_read(r=%p, buf=%p, bytes=" CUPS_LLFMT ")\n", r, buf, CUPS_LLCAST bytes));
+  DEBUG_printf(("5cups_raster_read(r=%p, buf=%p, bytes=" CUPS_LLFMT ")", (void *)r, (void *)buf, CUPS_LLCAST bytes));
 
   if (!r->compressed)
     return (cups_raster_io(r, buf, bytes));
@@ -1139,7 +1607,7 @@ cups_raster_read(cups_raster_t *r,	/* I - Raster stream */
   {
     count = (ssize_t)bytes - total;
 
-    DEBUG_printf(("6cups_raster_read: count=" CUPS_LLFMT ", remaining=" CUPS_LLFMT ", buf=%p, bufptr=%p, bufend=%p", CUPS_LLCAST count, CUPS_LLCAST remaining, buf, r->bufptr, r->bufend));
+    DEBUG_printf(("6cups_raster_read: count=" CUPS_LLFMT ", remaining=" CUPS_LLFMT ", buf=%p, bufptr=%p, bufend=%p", CUPS_LLCAST count, CUPS_LLCAST remaining, (void *)buf, (void *)r->bufptr, (void *)r->bufend));
 
     if (remaining == 0)
     {
@@ -1235,7 +1703,7 @@ cups_raster_read(cups_raster_t *r,	/* I - Raster stream */
  *                          current page.
  */
 
-static void
+static int				/* O - 1 on success, 0 on failure */
 cups_raster_update(cups_raster_t *r)	/* I - Raster stream */
 {
   if (r->sync == CUPS_RASTER_SYNCv1 || r->sync == CUPS_RASTER_REVSYNCv1 ||
@@ -1316,6 +1784,10 @@ cups_raster_update(cups_raster_t *r)	/* I - Raster stream */
           r->header.cupsNumColors = r->header.cupsColorSpace -
 	                            CUPS_CSPACE_DEVICE1 + 1;
 	  break;
+
+      default :
+          /* Unknown color space */
+          return (0);
     }
   }
 
@@ -1349,11 +1821,21 @@ cups_raster_update(cups_raster_t *r)	/* I - Raster stream */
     if (r->pixels != NULL)
       free(r->pixels);
 
-    r->pixels   = calloc(r->header.cupsBytesPerLine, 1);
+    if ((r->pixels = calloc(r->header.cupsBytesPerLine, 1)) == NULL)
+    {
+      r->pcurrent = NULL;
+      r->pend     = NULL;
+      r->count    = 0;
+
+      return (0);
+    }
+
     r->pcurrent = r->pixels;
     r->pend     = r->pixels + r->header.cupsBytesPerLine;
     r->count    = 0;
   }
+
+  return (1);
 }
 
 
@@ -1375,7 +1857,7 @@ cups_raster_write(
 			count;		/* Count */
 
 
-  DEBUG_printf(("3cups_raster_write(r=%p, pixels=%p)\n", r, pixels));
+  DEBUG_printf(("3cups_raster_write(r=%p, pixels=%p)", (void *)r, (void *)pixels));
 
  /*
   * Allocate a write buffer as needed...
@@ -1559,8 +2041,3 @@ cups_write_fd(void          *ctx,	/* I - File descriptor pointer */
 
   return (count);
 }
-
-
-/*
- * End of "$Id: raster.c 521 2015-08-27 18:34:36Z msweet $".
- */
