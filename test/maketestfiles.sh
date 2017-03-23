@@ -16,13 +16,15 @@ depths=""
 cspaces=""
 orders=""
 filter=""
+format="ras"
+FINAL_CONTENT_TYPE=application/vnd.cups-raster; export FINAL_CONTENT_TYPE
 if test -d /usr/libexec/cups/filter; then
 	filterpath="/usr/libexec/cups/filter"
 else
 	filterpath="/usr/lib/cups/filter"
 fi
 
-for file in imagetoraster cgimagetoraster; do
+for file in pdftoraster cgpdftoraster; do
 	if test -x $filterpath/$file; then
 		filter=$file
 		break
@@ -52,7 +54,7 @@ for option in $*; do
 		DeviceD | DeviceE | DeviceF)
 			cspaces="$cspaces $option"
 			;;
-		pstoraster | imagetoraster | cgimagetoraster | cgpdftoraster)
+		pstoraster | imagetoraster | pdftoraster | cgimagetoraster | cgpdftoraster)
 			filter="$option"
 			;;
 		all)
@@ -70,8 +72,23 @@ for option in $*; do
 			orders="Chunked Banded"
 			;;
 
+		apple)
+			FINAL_CONTENT_TYPE="image/urf"
+			format="apple"
+			;;
+
+		pwg)
+			FINAL_CONTENT_TYPE="image/pwg-raster"
+			format="pwg"
+			;;
+
+		ras)
+			FINAL_CONTENT_TYPE="application/vnd.cups-raster"
+			format="ras"
+			;;
+
 		clean)
-			rm -f *.ras *.log
+			rm -f *.apple *.pwg *.ras *.log
 			exit 0
 			;;
 
@@ -95,7 +112,9 @@ for option in $*; do
 			echo ""
 			echo "Orders: Chunked Banded"
 			echo ""
-			echo "Filters: cgpdftoraster cgimagetoraster imagetoraster pstoraster"
+			echo "Filters: cgimagetoraster cgpdftoraster imagetoraster pdftoraster pstoraster"
+			echo ""
+			echo "Formats: apple, pwg, ras"
 			echo ""
 			exit 0
 			;;
@@ -140,7 +159,7 @@ for cspace in $cspaces; do
 				esac
 			fi
 
-			echo -n $filter-$cspace-$depth-$order.ras:
+			echo "$filter-$cspace-$depth-$order.$format:\c"
 
 			case $filter in
 				pstoraster)
@@ -149,7 +168,7 @@ for cspace in $cspaces; do
 						$basedir/testprint.ps | \
 					$filterpath/pstoraster job user \
 						title 1 "") \
-						> $filter-$cspace-$depth-$order.ras \
+						> $filter-$cspace-$depth-$order.$format \
 						2> $filter-$cspace-$depth-$order.log
 					;;
 				imagetoraster)
@@ -157,7 +176,14 @@ for cspace in $cspaces; do
 						title 1 \
 						"scaling=100 ColorModel=$cspace cupsBitsPerColor=$depth cupsColorOrder=$order" \
 						$basedir/testprint.jpg \
-						> $filter-$cspace-$depth-$order.ras \
+						> $filter-$cspace-$depth-$order.$format \
+						2> $filter-$cspace-$depth-$order.log
+					;;
+				cgimagetopdf)
+					$filterpath/cgimagetopdf job user title 1 "" $basedir/testprint.jpg | $filterpath/cgpdftoraster job user \
+						title 1 \
+						"ColorModel=$cspace cupsBitsPerColor=$depth cupsColorOrder=$order" \
+						> $filter-$cspace-$depth-$order.$format \
 						2> $filter-$cspace-$depth-$order.log
 					;;
 				cgpdftoraster)
@@ -165,15 +191,15 @@ for cspace in $cspaces; do
 						title 1 \
 						"ColorModel=$cspace cupsBitsPerColor=$depth cupsColorOrder=$order" \
 						$basedir/testprint.pdf \
-						> $filter-$cspace-$depth-$order.ras \
+						> $filter-$cspace-$depth-$order.$format \
 						2> $filter-$cspace-$depth-$order.log
 					;;
-				cgimagetoraster)
-					$filterpath/cgimagetoraster job user \
+				pdftoraster)
+					$filterpath/pdftoraster job user \
 						title 1 \
 						"scaling=100 ColorModel=$cspace cupsBitsPerColor=$depth cupsColorOrder=$order" \
 						$basedir/testprint.jpg \
-						> $filter-$cspace-$depth-$order.ras  \
+						> $filter-$cspace-$depth-$order.$format  \
 						2> $filter-$cspace-$depth-$order.log
 					;;
 			esac
@@ -183,7 +209,7 @@ for cspace in $cspaces; do
 				rm -f $filter-$cspace-$depth-$order.log
 			else
 				echo " FAIL (see log file)"
-				rm -f $filter-$cspace-$depth-$order.ras
+				rm -f $filter-$cspace-$depth-$order.$format
 			fi
 		done
 	done

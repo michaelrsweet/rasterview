@@ -1,5 +1,9 @@
+*.apple
 *.dmg
+*.log
 *.o
+*.pwg
+*.ras
 Makefile
 RasterView.app/Contents/_CodeSignature
 RasterView.app/Contents/MacOS/rasterview

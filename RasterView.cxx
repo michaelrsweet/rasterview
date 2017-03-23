@@ -931,9 +931,7 @@ RasterView::open_cb()
 
   fc.title("Open?");
   fc.type(Fl_Native_File_Chooser::BROWSE_FILE);
-  fc.filter("Apple Raster Files\t*.apple\n"
-	    "CUPS Raster Files\t*.ras\n"
-	    "PWG Raster Files\t*.pwg\n");
+  fc.filter("Raster Files\t*.{apple,pwg,ras}\n");
 
   if (!fc.show())
     open_file(fc.filename());
