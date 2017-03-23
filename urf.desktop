@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=MimeType
+MimeType=image/urf
+Icon=rasterview.png
+Patterns=*.apple
+Name=Apple Raster File
+Comment=Apple Raster File
+Encoding=UTF-8

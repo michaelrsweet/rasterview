@@ -1,5 +1,7 @@
+*.dmg
 *.o
 Makefile
+RasterView.app/Contents/_CodeSignature
 RasterView.app/Contents/MacOS/rasterview
 autom4te.cache/
 config.log

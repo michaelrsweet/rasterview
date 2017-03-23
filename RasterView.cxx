@@ -1,9 +1,7 @@
 //
-// "$Id: RasterView.cxx 514 2015-08-26 21:39:41Z msweet $"
-//
 // CUPS raster file viewer application window code.
 //
-// Copyright 2002-2015 by Michael R Sweet.
+// Copyright 2002-2017 by Michael R Sweet.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,12 +18,12 @@
 // Include necessary headers...
 //
 
-#define __OPENTRANSPORTPROVIDERS__	// For MacOS X...
+#define __OPENTRANSPORTPROVIDERS__	// For macOS...
 #define FL_INTERNAL
 #include "RasterView.h"
 #include <FL/Fl.H>
 #include <FL/Fl_Color_Chooser.H>
-#include <FL/Fl_File_Chooser.H>
+#include <FL/Fl_Native_File_Chooser.H>
 #include <FL/x.H>
 
 
@@ -928,12 +926,17 @@ RasterView::open_file(const char *f)	// I - File to open
 void
 RasterView::open_cb()
 {
-  const char	*f = fl_file_chooser("Open?", "CUPS Raster Files (*.ras)\t"
-                                              "PWG Raster Files (*.pwg)", NULL);
+  Fl_Native_File_Chooser fc;
 
 
-  if (f)
-    open_file(f);
+  fc.title("Open?");
+  fc.type(Fl_Native_File_Chooser::BROWSE_FILE);
+  fc.filter("Apple Raster Files\t*.apple\n"
+	    "CUPS Raster Files\t*.ras\n"
+	    "PWG Raster Files\t*.pwg\n");
+
+  if (!fc.show())
+    open_file(fc.filename());
 }
 
 
@@ -1094,8 +1097,3 @@ RasterView::~RasterView()
       first_ = current->next_;
   }
 }
-
-
-//
-// End of "$Id: RasterView.cxx 514 2015-08-26 21:39:41Z msweet $".
-//

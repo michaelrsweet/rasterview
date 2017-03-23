@@ -1,9 +1,7 @@
 //
-// "$Id: main.cxx 511 2015-08-26 01:48:51Z msweet $"
-//
 // Raster file viewer for CUPS.
 //
-// Copyright 1997-2015 by Michael R Sweet.
+// Copyright 1997-2017 by Michael R Sweet.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -55,8 +53,3 @@ main(int  argc,				// I - Number of command-line arguments
 
   return (0);
 }
-
-
-//
-// End of "$Id: main.cxx 511 2015-08-26 01:48:51Z msweet $".
-//

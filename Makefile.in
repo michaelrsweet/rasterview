@@ -1,9 +1,7 @@
 #
-# "$Id: Makefile.in 519 2015-08-26 22:46:44Z msweet $"
-#
 # Makefile for rasterview, a CUPS/PWG Raster viewing program.
 #
-# Copyright 2002-2015 by Michael R Sweet
+# Copyright 2002-2017 by Michael R Sweet
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License v2 as published
@@ -64,7 +62,7 @@ all:	rasterview testcie
 
 
 clean:
-	$(RM) rasterview
+	$(RM) rasterview testcie
 	$(RM) $(OBJS)
 	$(RM) *.bck
 	$(RM) *~
@@ -78,6 +76,7 @@ distclean:	clean
 	$(RM) -r autom4te*
 	$(RM) config.*
 	$(RM) Makefile
+	$(RM) RasterView.app/Contents/MacOS/rasterview
 
 
 install: all @INSTALLDESKTOP@
@@ -92,10 +91,9 @@ install-desktop:
 	cp vnd.cups-raster.desktop $(BUILDROOT)$(datadir)/mimelnk/application
 	$(MKDIR) $(BUILDROOT)$(datadir)/mimelnk/image
 	cp pwg-raster.desktop $(BUILDROOT)$(datadir)/mimelnk/image
+	cp urf.desktop $(BUILDROOT)$(datadir)/mimelnk/image
 	$(MKDIR) $(BUILDROOT)$(datadir)/icons/hicolor/32x32/apps
 	cp rasterview-32.png $(BUILDROOT)$(datadir)/icons/hicolor/32x32/apps/rasterview.png
-	$(MKDIR) $(BUILDROOT)$(datadir)/icons/hicolor/48x48/apps
-	cp rasterview-48.png $(BUILDROOT)$(datadir)/icons/hicolor/48x48/apps/rasterview.png
 	$(MKDIR) $(BUILDROOT)$(datadir)/icons/hicolor/128x128/apps
 	cp rasterview-128.png $(BUILDROOT)$(datadir)/icons/hicolor/128x128/apps/rasterview.png
 
@@ -108,17 +106,19 @@ uninstall-desktop:
 	$(RM) $(desktopdir)/Graphics/rasterview.desktop
 	$(RM) $(datadir)/mimelnk/application/vnd.cups-raster.desktop
 	$(RM) $(datadir)/mimelnk/image/pwg-raster.desktop
+	$(RM) $(datadir)/mimelnk/image/urf.desktop
 	$(RM) $(datadir)/icons/hicolor/32x32/apps/rasterview.png
-	$(RM) $(datadir)/icons/hicolor/48x48/apps/rasterview.png
 	$(RM) $(datadir)/icons/hicolor/128x128/apps/rasterview.png
 
 
-# Make a disk image with the compiled program on MacOS X...
-VERSION	=	@VERSION@
+# Make a disk image with the compiled program on macOS...
+VERSION		=	@VERSION@
+IDENTITY        =       "Developer ID Application: Michael Sweet (RU58A2256H)"
 
 dmg:	all
 	rm -f rasterview-$(VERSION).dmg
-	codesign -s "$(MAC_DEV_IDENTITY)" RasterView.app
+	$(CP) rasterview RasterView.app/Contents/MacOS
+	codesign -s $(IDENTITY) RasterView.app
 	hdiutil create -srcfolder RasterView.app rasterview-$(VERSION).dmg
 
 
@@ -132,7 +132,6 @@ rpm:	all
 # Build the rasterview program...
 rasterview:	$(RVOBJS) Makefile
 	$(CXX) $(LDFLAGS) -o $@ $(RVOBJS) $(LIBS)
-	$(CP) rasterview RasterView.app/Contents/MacOS
 
 $(RVOBJS):	RasterView.h RasterDisplay.h
 
@@ -142,23 +141,7 @@ testcie:	testcie.o Makefile
 	$(CC) $(LDFLAGS) -o $@ testcie.o -lm
 
 
+# Dependencies...
 $(OBJS):	Makefile
 
-
-# autoconf stuff...
-Makefile: configure Makefile.in
-	if test -f config.status; then \
-		./config.status --recheck; \
-		./config.status; \
-	else \
-		./configure; \
-	fi
-
-
-# Include dependencies...
 include .depend
-
-
-#
-# End of "$Id: Makefile.in 519 2015-08-26 22:46:44Z msweet $".
-#
