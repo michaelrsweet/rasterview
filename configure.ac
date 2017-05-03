@@ -16,7 +16,7 @@
 dnl We need at least autoconf 2.50...
 AC_PREREQ(2.60)
 
-AC_INIT([RasterView],[1.5],[https://github.com/michaelrsweet/rasterview/issues],[rasterview],[https://michaelrsweet.github.io/rasterview])
+AC_INIT([RasterView],[1.5.1],[https://github.com/michaelrsweet/rasterview/issues],[rasterview],[https://michaelrsweet.github.io/rasterview])
 
 dnl Version number...
 VERSION="AC_PACKAGE_VERSION"
@@ -66,7 +66,7 @@ dnl Check for FLTK...
 AC_PATH_PROG(FLTKCONFIG,fltk-config)
 
 if test "x$FLTKCONFIG" = x; then
-	AC_MSG_ERROR([Sorry, rasterview requires FLTK 1.1.x.])
+	AC_MSG_ERROR([Sorry, rasterview requires FLTK 1.1.x or later.])
 else
 	CXXFLAGS="`$FLTKCONFIG --use-images --cflags` $CXXFLAGS"
 	LIBS="`$FLTKCONFIG --use-images --ldflags` $LIBS"
@@ -88,7 +88,7 @@ fi
 dnl See if we have the X11 desktop stuff used by GNOME and KDE...
 AC_MSG_CHECKING(if GNOME/KDE desktop is in use)
 desktopdir=""
-for dir in /usr/share/applnk /etc/X11/applnk; do
+for dir in /usr/share/applications /usr/share/applnk /etc/X11/applnk; do
 	if test -d $dir; then
 		desktopdir=$dir
 		break
