@@ -150,7 +150,7 @@ cupsRasterInitPWGHeader(
 
   memset(h, 0, sizeof(cups_page_header2_t));
 
-  strlcpy(h->cupsPageSizeName, media->pwg, sizeof(h->cupsPageSizeName));
+  strncpy(h->cupsPageSizeName, media->pwg, sizeof(h->cupsPageSizeName) - 1);
 
   h->PageSize[0] = (unsigned)(72 * media->width / 2540);
   h->PageSize[1] = (unsigned)(72 * media->length / 2540);
@@ -893,11 +893,11 @@ cupsRasterWriteHeader(
 
     memset(&fh, 0, sizeof(fh));
 
-    strlcpy(fh.MediaClass, "PwgRaster", sizeof(fh.MediaClass));
+    strncpy(fh.MediaClass, "PwgRaster", sizeof(fh.MediaClass) - 1);
 					/* PwgRaster */
-    strlcpy(fh.MediaColor, r->header.MediaColor, sizeof(fh.MediaColor));
-    strlcpy(fh.MediaType, r->header.MediaType, sizeof(fh.MediaType));
-    strlcpy(fh.OutputType, r->header.OutputType, sizeof(fh.OutputType));
+    strncpy(fh.MediaColor, r->header.MediaColor, sizeof(fh.MediaColor) - 1);
+    strncpy(fh.MediaType, r->header.MediaType, sizeof(fh.MediaType) - 1);
+    strncpy(fh.OutputType, r->header.OutputType, sizeof(fh.OutputType) - 1);
 					/* PrintContentType */
 
     fh.CutMedia              = htonl(r->header.CutMedia);
@@ -955,10 +955,10 @@ cupsRasterWriteHeader(
     memcpy(dst, src, sizeof(fh.cupsReal) + sizeof(fh.cupsString));
 					/* VendorData */
 
-    strlcpy(fh.cupsRenderingIntent, r->header.cupsRenderingIntent,
-            sizeof(fh.cupsRenderingIntent));
-    strlcpy(fh.cupsPageSizeName, r->header.cupsPageSizeName,
-            sizeof(fh.cupsPageSizeName));
+    strncpy(fh.cupsRenderingIntent, r->header.cupsRenderingIntent,
+            sizeof(fh.cupsRenderingIntent) - 1);
+    strncpy(fh.cupsPageSizeName, r->header.cupsPageSizeName,
+            sizeof(fh.cupsPageSizeName) - 1);
 
     return (cups_raster_io(r, (unsigned char *)&fh, sizeof(fh)) == sizeof(fh));
   }
@@ -1063,14 +1063,14 @@ cupsRasterWriteHeader2(
     cups_page_header2_t	fh;		/* File page header */
 
     memset(&fh, 0, sizeof(fh));
-    strlcpy(fh.MediaClass, "PwgRaster", sizeof(fh.MediaClass));
-    strlcpy(fh.MediaColor, r->header.MediaColor, sizeof(fh.MediaColor));
-    strlcpy(fh.MediaType, r->header.MediaType, sizeof(fh.MediaType));
-    strlcpy(fh.OutputType, r->header.OutputType, sizeof(fh.OutputType));
-    strlcpy(fh.cupsRenderingIntent, r->header.cupsRenderingIntent,
-            sizeof(fh.cupsRenderingIntent));
-    strlcpy(fh.cupsPageSizeName, r->header.cupsPageSizeName,
-            sizeof(fh.cupsPageSizeName));
+    strncpy(fh.MediaClass, "PwgRaster", sizeof(fh.MediaClass) - 1);
+    strncpy(fh.MediaColor, r->header.MediaColor, sizeof(fh.MediaColor) - 1);
+    strncpy(fh.MediaType, r->header.MediaType, sizeof(fh.MediaType) - 1);
+    strncpy(fh.OutputType, r->header.OutputType, sizeof(fh.OutputType) - 1);
+    strncpy(fh.cupsRenderingIntent, r->header.cupsRenderingIntent,
+            sizeof(fh.cupsRenderingIntent) - 1);
+    strncpy(fh.cupsPageSizeName, r->header.cupsPageSizeName,
+            sizeof(fh.cupsPageSizeName) - 1);
 
     fh.CutMedia              = htonl(r->header.CutMedia);
     fh.Duplex                = htonl(r->header.Duplex);
@@ -1468,7 +1468,7 @@ cups_raster_read_header(
 	    return (0);
 	  }
 
-	  strlcpy(r->header.MediaClass, "PwgRaster", sizeof(r->header.MediaClass));
+	  strncpy(r->header.MediaClass, "PwgRaster", sizeof(r->header.MediaClass) - 1);
 					      /* PwgRaster */
           r->header.cupsBitsPerPixel = appleheader[0];
           r->header.cupsColorSpace   = appleheader[1] >= (sizeof(rawcspace) / sizeof(rawcspace[0])) ? CUPS_CSPACE_DEVICE1 : rawcspace[appleheader[1]];
