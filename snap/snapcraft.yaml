@@ -17,7 +17,7 @@ icon: rasterview-128.png
 apps:
     rasterview:
         command: usr/bin/rasterview
-        desktop: usr/share/applications/rasterview.desktop)
+        desktop: usr/share/applications/rasterview.desktop
         plugs: [home x11]
 
 parts:
