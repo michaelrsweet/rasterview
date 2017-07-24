@@ -1,5 +1,7 @@
 # RasterView v1.5
 
+[![Snap Status](https://build.snapcraft.io/badge/michaelrsweet/rasterview.svg)](https://build.snapcraft.io/user/michaelrsweet/rasterview)
+
 RasterView is a CUPS, PWG, and Apple raster file viewing application. It
 basically allows you to look at the raster data produced by any of the standard
 CUPS RIP filters (cgpdftoraster, imagetoraster, pdftoraster, and pstoraster) and
