@@ -198,7 +198,7 @@ for cspace in $cspaces; do
 					$filterpath/pdftoraster job user \
 						title 1 \
 						"scaling=100 ColorModel=$cspace cupsBitsPerColor=$depth cupsColorOrder=$order" \
-						$basedir/testprint.jpg \
+						$basedir/testprint.pdf \
 						> $filter-$cspace-$depth-$order.$format  \
 						2> $filter-$cspace-$depth-$order.log
 					;;
