@@ -11,7 +11,7 @@
 	<string>org.msweet.rasterview</string>
 
 	<key>CFBundleVersion</key>
-	<string>1.5</string>
+	<string>1.5.1</string>
 
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
@@ -35,10 +35,10 @@
 	<string>rasterview.icns</string>
 
 	<key>CFBundleShortVersionString</key>
-	<string>1.5</string>
+	<string>1.5.1</string>
 
 	<key>CFBundleGetInfoString</key>
-	<string>1.5, Copyright 2002-2017 by Michael R Sweet</string>
+	<string>1.5.1, Copyright 2002-2017 by Michael R Sweet</string>
 
 	<key>CFBundleDocumentTypes</key>
 	<array>
@@ -48,6 +48,7 @@
                     <string>apple</string>
                     <string>pwg</string>
                     <string>ras</string>
+                    <string>urf</string>
         	</array>
 
         	<key>CFBundleTypeIconFile</key>
