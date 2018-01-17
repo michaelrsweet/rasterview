@@ -1,7 +1,7 @@
 #
 # Configure script for rasterview, a CUPS/PWG Raster viewing program.
 #
-# Copyright 2002-2017 by Michael R Sweet
+# Copyright 2002-2018 by Michael R Sweet
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License v2 as published
@@ -16,7 +16,7 @@
 dnl We need at least autoconf 2.50...
 AC_PREREQ(2.60)
 
-AC_INIT([RasterView],[1.5.1],[https://github.com/michaelrsweet/rasterview/issues],[rasterview],[https://michaelrsweet.github.io/rasterview])
+AC_INIT([RasterView],[1.5.2],[https://github.com/michaelrsweet/rasterview/issues],[rasterview],[https://michaelrsweet.github.io/rasterview])
 
 dnl Version number...
 VERSION="AC_PACKAGE_VERSION"
