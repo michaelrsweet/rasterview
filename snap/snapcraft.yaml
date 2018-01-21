@@ -7,29 +7,31 @@ description: |
   you to look at the raster data produced by any of the standard CUPS RIP filters
   (cgpdftoraster, imagetoraster, pdftoraster, and pstoraster) and is normally used
   to either test those filters or look at the data that is being sent to your
-  raster printer driver.  RasterView is provided as free software under version 2
-  of the GNU General Public license.
+  raster printer driver.  RasterView is provided as free software under the
+  Apache License, Version 2.0.
 
 grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
 icon: rasterview-128.png
 
-plugs:
-    gnome-3-26-1604:
-        interface: content
-        target: $SNAP/gnome-platform
-        default-provider: gnome-3-26-1604:gnome-3-26-1604
+#plugs:
+#    gnome-3-26-1604:
+#        interface: content
+#        target: $SNAP/gnome-platform
+#        default-provider: gnome-3-26-1604:gnome-3-26-1604
 
 apps:
     rasterview:
-        command: desktop-launch rasterview
+        command: desktop-launch $SNAP/bin/rasterview
         desktop: usr/share/applications/Development/rasterview.desktop
-        plugs: [desktop, desktop-legacy, home, unity7, wayland, x11]
+#        plugs: [desktop, desktop-legacy, home, unity7, wayland, x11]
+        plugs: [home, x11]
 
 parts:
     main:
         plugin: autotools
         source: .
-        after: [desktop-gnome-platform]
+#        after: [desktop-gnome-platform]
+        after: [desktop]
 
 build-packages: [libfltk1.3-dev]
