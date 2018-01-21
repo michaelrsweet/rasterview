@@ -14,6 +14,12 @@ grade: devel # must be 'stable' to release into candidate/stable channels
 confinement: devmode # use 'strict' once you have the right plugs and slots
 icon: rasterview-128.png
 
+plugs:
+    gnome-3-26-1604:
+        interface: content
+        target: $SNAP/gnome-platform
+        default-provider: gnome-3-26-1604:gnome-3-26-1604
+
 apps:
     rasterview:
         command: desktop-launch rasterview
