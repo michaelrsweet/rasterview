@@ -1,6 +1,6 @@
 
 name: rasterview
-version: 1.5.1
+version: 1.6
 summary: CUPS/PWG/Apple Raster File Viewer
 description: |
   RasterView is a CUPS, PWG, and Apple raster file viewer.  It basically allows
@@ -24,6 +24,6 @@ parts:
     main:
         plugin: autotools
         source: .
+        after: [desktop-gtk3]
 
 build-packages: [libfltk1.3-dev]
-
