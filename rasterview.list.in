@@ -1,26 +1,18 @@
 #
-# "$Id: rasterview.list.in 521 2015-08-27 18:34:36Z msweet $"
-#
 # EPM list file for rasterview, a CUPS/PWG Raster viewing program.
 #
-# Copyright 2002-2015 by Michael R Sweet
+# Copyright © 2002-2018 by Michael R Sweet
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License v2 as published
-# by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# Licensed under Apache License v2.0.  See the file "LICENSE" for more
+# information.
 #
 
 # Product information
 %product CUPS Raster Viewer
 %version @VERSION@
-%copyright 2002-2015 by Michael R Sweet
+%copyright 2002-2018 by Michael R Sweet
 %vendor Michael R Sweet
-%license COPYING
+%license LICENSE
 %readme README
 %description <<EOF
 Rasterview is a CUPS/PWG Raster file viewing application that can be used to
@@ -55,7 +47,3 @@ f 0644 root sys $datadir/icons/hicolor/48x48/apps/rasterview.png rasterview-48.p
 
 d 0755 root sys $datadir/icons/hicolor/128x128/apps -
 f 0644 root sys $datadir/icons/hicolor/128x128/apps/rasterview.png rasterview-128.png
-
-#
-# End of "$Id: rasterview.list.in 521 2015-08-27 18:34:36Z msweet $".
-#

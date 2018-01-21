@@ -5,15 +5,8 @@
 //
 // Copyright 2002-2015 by Michael R Sweet.
 //
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2, or (at your option)
-// any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// Licensed under Apache License v2.0.  See the file "LICENSE" for more
+// information.
 //
 
 #include "RasterDisplay.h"
@@ -5606,8 +5599,3 @@ convert_ymck(
     }
   }
 }
-
-
-//
-// End of "$Id: RasterDisplay.cxx 514 2015-08-26 21:39:41Z msweet $".
-//

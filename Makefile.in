@@ -1,16 +1,10 @@
 #
 # Makefile for rasterview, a CUPS/PWG Raster viewing program.
 #
-# Copyright 2002-2017 by Michael R Sweet
+# Copyright 2002-2018 by Michael R Sweet
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License v2 as published
-# by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# Licensed under Apache License v2.0.  See the file "LICENSE" for more
+# information.
 #
 
 
@@ -114,7 +108,7 @@ uninstall-desktop:
 
 # Make a disk image with the compiled program on macOS...
 VERSION		=	@VERSION@
-IDENTITY        =       "Developer ID Application: Michael Sweet (RU58A2256H)"
+IDENTITY        =       "Developer ID"
 
 dmg:	all
 	rm -f rasterview-$(VERSION).dmg

@@ -1,4 +1,4 @@
-# RasterView v1.5
+# RasterView v1.6
 
 RasterView is a CUPS, PWG, and Apple raster file viewing application. It
 basically allows you to look at the raster data produced by any of the standard
@@ -42,15 +42,22 @@ standard RIP filters.  Run the following command for help:
 
 ## Legal Stuff
 
-RasterView is Copyright 2002-2017 by Michael R Sweet.
+RasterView is Copyright © 2002-2018 by Michael R Sweet.
 
-This program is free software; you can redistribute it and/or modify it under
-the terms of version 2 of the GNU General Public License as published by the
-Free Software Foundation.
+RasterView is provided under the terms of the Apache License, Version 2.0.  A
+copy of this license can be found in the file `LICENSE`.  Additional legal
+information is provided in the file `NOTICE`.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations under the License.
+
+
+## Changes in v1.6 - 2018-01-21
+
+- Now licensed under the Apache License Version 2.0.
+- Fixed support for 16-bit per color files.
 
 
 ## Changes in v1.5 - 2017-03-22
