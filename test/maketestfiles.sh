@@ -179,10 +179,13 @@ for cspace in $cspaces; do
 						> $filter-$cspace-$depth-$order.$format \
 						2> $filter-$cspace-$depth-$order.log
 					;;
-				cgimagetopdf)
-					$filterpath/cgimagetopdf job user title 1 "" $basedir/testprint.jpg | $filterpath/cgpdftoraster job user \
+				cgimagetoraster)
+					($filterpath/cgimagetopdf job user title 1 \
+						"" \
+						$basedir/testprint.jpg | \
+					$filterpath/cgpdftoraster job user \
 						title 1 \
-						"ColorModel=$cspace cupsBitsPerColor=$depth cupsColorOrder=$order" \
+						"ColorModel=$cspace cupsBitsPerColor=$depth cupsColorOrder=$order") \
 						> $filter-$cspace-$depth-$order.$format \
 						2> $filter-$cspace-$depth-$order.log
 					;;
