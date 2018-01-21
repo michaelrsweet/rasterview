@@ -74,6 +74,9 @@ fi
 
 AC_SUBST(FLTKCONFIG)
 
+dnl Make sure we include zlib (always available via FLTK)
+AC_SEARCH_LIBS(gzopen, z)
+
 dnl Support large files.
 AC_SYS_LARGEFILE
 
