@@ -16,14 +16,14 @@ icon: rasterview-128.png
 
 apps:
     rasterview:
-        command: bin/rasterview
+        command: desktop-launch rasterview
         desktop: usr/share/applications/Development/rasterview.desktop
-        plugs: [home, unity7, x11]
+        plugs: [desktop, desktop-legacy, home, unity7, wayland, x11]
 
 parts:
     main:
         plugin: autotools
         source: .
-        after: [desktop-gtk3]
+        after: [desktop-gnome-platform]
 
 build-packages: [libfltk1.3-dev]
