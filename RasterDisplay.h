@@ -1,7 +1,7 @@
 //
 // CUPS raster file display widget header file.
 //
-// Copyright 2002-2015 by Michael R Sweet.
+// Copyright 2002-2018 by Michael R Sweet.
 //
 // Licensed under Apache License v2.0.  See the file "LICENSE" for more
 // information.
@@ -19,6 +19,7 @@
 #  include <FL/Fl.H>
 #  include <FL/Fl_Group.H>
 #  include <FL/Fl_Scrollbar.H>
+#  include <zlib.h>
 
 
 //
@@ -41,6 +42,7 @@ enum
 class RasterDisplay : public Fl_Group
 {
   cups_raster_t		*ras_;		// Raster stream
+  gzFile		fp_;		// File pointer
   int			ras_eof_;	// End of file?
   cups_page_header2_t	header_,	// Page header for current page
 			next_header_;	// Next page header

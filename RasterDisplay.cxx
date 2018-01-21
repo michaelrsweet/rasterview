@@ -3,7 +3,7 @@
 //
 // CUPS/PWG Raster display widget methods.
 //
-// Copyright 2002-2015 by Michael R Sweet.
+// Copyright 2002-2018 by Michael R Sweet.
 //
 // Licensed under Apache License v2.0.  See the file "LICENSE" for more
 // information.
@@ -80,6 +80,7 @@ static void	convert_ymc(cups_page_header2_t *header, uchar *line,
 		            uchar *colors, uchar *pixels);
 static void	convert_ymck(cups_page_header2_t *header, uchar *line,
 		             uchar *colors, uchar *pixels);
+static ssize_t	raster_cb(gzFile ctx, unsigned char *buffer, size_t length);
 
 
 //
@@ -103,6 +104,7 @@ RasterDisplay::RasterDisplay(
   memset(&header_, 0, sizeof(header_));
   memset(&next_header_, 0, sizeof(next_header_));
 
+  fp_           = NULL;
   ras_          = NULL;
   ras_eof_      = 1;
   pixels_       = NULL;
@@ -146,6 +148,12 @@ RasterDisplay::close_file()
     cupsRasterClose(ras_);
     ras_     = NULL;
     ras_eof_ = 1;
+  }
+
+  if (fp_)
+  {
+    gzclose(fp_);
+    fp_ = NULL;
   }
 
   if (pixels_)
@@ -1057,23 +1065,21 @@ int					// O - 1 on success, 0 on failure
 RasterDisplay::open_file(
     const char *filename)		// I - File to open
 {
-  int	fd;				// File descriptor for stream
-
-
 //  printf("RasterDisplay::open_file(filename=\"%s\")\n", filename);
 
   close_file();
 
-  if ((fd = open(filename, O_RDONLY)) < 0)
+  if ((fp_ = gzopen(filename, "r")) == NULL)
   {
     fl_alert("Unable to open file: %s", strerror(errno));
     return (0);
   }
 
-  if ((ras_ = cupsRasterOpen(fd, CUPS_RASTER_READ)) == NULL)
+  if ((ras_ = cupsRasterOpenIO((cups_raster_iocb_t)raster_cb, fp_, CUPS_RASTER_READ)) == NULL)
   {
-    fl_alert("cupsRasterOpen() failed!");
-    close(fd);
+    fl_alert("cupsRasterOpenIO() failed.");
+    gzclose(fp_);
+    fp_ = NULL;
     return (0);
   }
 
@@ -5598,4 +5604,17 @@ convert_ymck(
           break;
     }
   }
+}
+
+
+/*
+ * 'raster_cb()' - Read data from a gzFile.
+ */
+
+static ssize_t				/* O - Bytes read or -1 on error */
+raster_cb(gzFile        ctx,		/* I - File pointer */
+          unsigned char *buffer,	/* I - Buffer */
+          size_t        length)		/* I - Bytes to read */
+{
+  return ((ssize_t)gzread(ctx, buffer, (unsigned)length));
 }

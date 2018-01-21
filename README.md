@@ -58,6 +58,7 @@ specific language governing permissions and limitations under the License.
 
 - Now licensed under the Apache License Version 2.0.
 - Fixed support for 16-bit per color files.
+- Added support for gzip'd raster files (Issue #7)
 
 
 ## Changes in v1.5 - 2017-03-22
