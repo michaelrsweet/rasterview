@@ -32,6 +32,6 @@ parts:
         plugin: autotools
         source: .
 #        after: [desktop-gnome-platform]
-        after: [desktop]
+        after: [desktop-glib-only]
 
 build-packages: [libfltk1.3-dev]
