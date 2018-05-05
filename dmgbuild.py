@@ -1,6 +1,6 @@
-files = [ 'rasterview/RasterView.app' ]
+files = [ 'RasterView.app' ]
 symlinks = { 'Applications': '/Applications' }
-badge_icon = 'rasterview/RasterView.app/Contents/Resources/rasterview.icns'
+badge_icon = 'RasterView.app/Contents/Resources/rasterview.icns'
 background = 'dmgbuild.png'
 window_rect = ((300,300),(640,295))
 default_view = 'icon-view'
