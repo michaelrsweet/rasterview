@@ -6,8 +6,7 @@ CUPS RIP filters (cgpdftoraster, imagetoraster, pdftoraster, and pstoraster) and
 is normally used to either test those filters or look at the data that is being
 sent to your raster printer driver.
 
-RasterView is provided as free software under version 2 of the GNU General
-Public license.
+RasterView is licensed under the Apache License Version 2.0.
 
 More information can be found at:
 

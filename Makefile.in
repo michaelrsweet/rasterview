@@ -114,7 +114,7 @@ dmg:	all
 	rm -f rasterview-$(VERSION).dmg
 	$(CP) rasterview RasterView.app/Contents/MacOS
 	codesign -s $(IDENTITY) RasterView.app
-	hdiutil create -srcfolder RasterView.app rasterview-$(VERSION).dmg
+	dmgbuild -s dmgbuild.py "RasterView $(VERSION)" ~/Desktop/rasterview-$(VERSION)-macos.dmg
 
 
 # Make an RPM for Linux...

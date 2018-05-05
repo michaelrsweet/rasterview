@@ -1,0 +1,13 @@
+files = [ 'rasterview/rasterview.app' ]
+symlinks = { 'Applications': '/Applications' }
+badge_icon = 'rasterview/rasterview.app/Contents/Resources/rasterview.icns'
+background = 'dmgbuild.png'
+window_rect = ((300,300),(640,295))
+default_view = 'icon-view'
+grid_offset = (0, 0)
+grid_spacing = 100
+scroll_position = (0, 0)
+label_pos = 'bottom'
+text_size = 16
+icon_size = 128
+icon_locations = { 'rasterview.app': (140, 120), 'Applications': (500, 120) }
