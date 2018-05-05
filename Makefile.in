@@ -112,7 +112,8 @@ IDENTITY        =       "Developer ID"
 
 dmg:	all
 	rm -f rasterview-$(VERSION).dmg
-	$(CP) rasterview RasterView.app/Contents/MacOS
+	test -d RasterView.app/Contents/MacOS || mkdir RasterView.app/Contents/MacOS
+	$(CP) rasterview RasterView.app/Contents/MacOS/rasterview
 	codesign -s $(IDENTITY) RasterView.app
 	dmgbuild -s dmgbuild.py "RasterView $(VERSION)" ~/Desktop/rasterview-$(VERSION)-macos.dmg
 
