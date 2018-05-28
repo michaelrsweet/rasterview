@@ -168,6 +168,18 @@ static ssize_t	cups_write_fd(void *ctx, unsigned char *buf, size_t bytes);
 
 
 /*
+ * 'rasterReset()' - Reset the read buffer after a seek.
+ */
+
+void
+rasterReset(cups_raster_t *r)		/* I - Stream to reset */
+{
+  r->bufptr = r->buffer;
+  r->bufend = r->buffer;
+}
+
+
+/*
  * 'cupsRasterClose()' - Close a raster stream.
  *
  * The file descriptor associated with the raster stream must be closed

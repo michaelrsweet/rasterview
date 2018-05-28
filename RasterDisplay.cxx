@@ -102,11 +102,9 @@ RasterDisplay::RasterDisplay(
   box(FL_DOWN_BOX);
 
   memset(&header_, 0, sizeof(header_));
-  memset(&next_header_, 0, sizeof(next_header_));
 
   fp_           = NULL;
   ras_          = NULL;
-  ras_eof_      = 1;
   pixels_       = NULL;
   alloc_pixels_ = 0;
   colors_       = NULL;
@@ -147,7 +145,6 @@ RasterDisplay::close_file()
   {
     cupsRasterClose(ras_);
     ras_     = NULL;
-    ras_eof_ = 1;
   }
 
   if (fp_)
@@ -672,20 +669,26 @@ RasterDisplay::load_page()
   }	endian_test;			// Endian test variable
 
 
-  if (!ras_ || ras_eof_)
+  if (!ras_ || page_ >= num_pages_)
     return (0);
 
-  if (next_header_.cupsColorOrder == CUPS_ORDER_PLANAR)
+  if (!cupsRasterReadHeader2(ras_, &header_))
+  {
+    fl_alert("cupsRasterReadHeader() failed!");
+    close_file();
+    return (0);
+  }
+
+  page_ ++;
+
+  if (header_.cupsColorOrder == CUPS_ORDER_PLANAR)
   {
     fl_alert("Sorry, we don't support planar raster data at this time!");
     close_file();
     return (0);
   }
 
-  // Copy the next page header to the current one and allocate memory
-  // for the page data...
-  memcpy(&header_, &next_header_, sizeof(header_));
-
+  // Allocate memory for the page data...
 #ifdef DEBUG
   fprintf(stderr, "DEBUG: sizeof(cups_page_header_t) = %d\n", (int)sizeof(cups_page_header_t));
   fprintf(stderr, "DEBUG: sizeof(cups_page_header2_t) = %d\n", (int)sizeof(cups_page_header2_t));
@@ -922,7 +925,6 @@ RasterDisplay::load_page()
     {
       fl_alert("Unable to read page data: %s", strerror(errno));
       delete[] line;
-      ras_eof_ = 1;
       return (0);
     }
 
@@ -1048,10 +1050,6 @@ RasterDisplay::load_page()
   // Mark the page for redisplay...
   redraw();
 
-  // Try reading the next page header...
-  if (!cupsRasterReadHeader2(ras_, &next_header_))
-    ras_eof_ = 1;
-
   // Return successfully...
   return (1);
 }
@@ -1065,7 +1063,11 @@ int					// O - 1 on success, 0 on failure
 RasterDisplay::open_file(
     const char *filename)		// I - File to open
 {
-//  printf("RasterDisplay::open_file(filename=\"%s\")\n", filename);
+  cups_page_header2_t	header;		// Page header
+  uchar			*buffer = NULL;	// Line buffer
+  unsigned		bufsize = 0;	// Size of line buffer
+  unsigned		y;		// Current line
+
 
   close_file();
 
@@ -1083,16 +1085,72 @@ RasterDisplay::open_file(
     return (0);
   }
 
-  if (!cupsRasterReadHeader2(ras_, &next_header_))
+  // Figure out the number of pages and their offsets...
+  num_pages_ = 0;
+  pages_[0]  = gztell(fp_);
+
+  while (cupsRasterReadHeader2(ras_, &header))
   {
-    fl_alert("cupsRasterReadHeader() failed!");
-    close_file();
-    return (0);
+    num_pages_ ++;
+
+    fprintf(stderr, "PAGE %d: %ux%ux%u @ %ld\n", num_pages_, header.cupsWidth, header.cupsHeight, header.cupsBitsPerPixel, (long)pages_[num_pages_ - 1]);
+
+    if (header.cupsBytesPerLine > bufsize)
+    {
+      bufsize = header.cupsBytesPerLine;
+      buffer  = (uchar *)realloc(buffer, bufsize);
+    }
+
+    for (y = header.cupsHeight; y > 0; y --)
+      cupsRasterReadPixels(ras_, buffer, header.cupsBytesPerLine);
+
+    if (num_pages_ >= RASTER_MAX_PAGES)
+      break;
+
+    pages_[num_pages_] = gztell(fp_);
   }
 
-  ras_eof_ = 0;
+  gzseek(fp_, pages_[0], SEEK_SET);
+  rasterReset(ras_);
+  page_ = 0;
 
   return (load_page());
+}
+
+
+//
+// 'RasterDisplay::page()' - Return the current page number.
+//
+
+int					// O - Current page
+RasterDisplay::page(void)
+{
+  return (page_);
+}
+
+
+/*
+ * 'RasterDisplay::page()' - Set the current page number.
+ */
+
+void
+RasterDisplay::page(int number)		// I - New page
+{
+  if (number < 1)
+    number = 1;
+  else if (number > num_pages_)
+    number = num_pages_;
+
+  if (number == (page_ + 1))
+    this->load_page();
+  else if (number != page_)
+  {
+    gzseek(fp_, pages_[number - 1], SEEK_SET);
+    rasterReset(ras_);
+
+    page_ = number - 1;
+    this->load_page();
+  }
 }
 
 

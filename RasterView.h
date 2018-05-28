@@ -19,6 +19,7 @@
 #  include <FL/Fl_Double_Window.H>
 #  include <FL/Fl_Button.H>
 #  include <FL/Fl_Check_Button.H>
+#  include <FL/Fl_Int_Input.H>
 #  include <FL/Fl_Sys_Menu_Bar.H>
 #  include <FL/Fl_Text_Display.H>
 #  include <FL/Fl_Help_Dialog.H>
@@ -38,8 +39,10 @@ class RasterView : public Fl_Double_Window
   Fl_Sys_Menu_Bar	*menubar_;	// Menubar
   RasterDisplay		*display_;	// Display widget
   Fl_Group		*buttons_;	// Button bar
-  Fl_Button		*next_button_,	// Next page button
+  Fl_Button		*prev_button_,	// Previous page button
+			*next_button_,	// Next page button
 			*attrs_button_;	// Toggle attributes button
+  Fl_Int_Input		*page_input_;	// Page number control
   Fl_Group		*attributes_;	// Attributes pane
   Fl_Button		*colors_[15];	// Color buttons
   Fl_Text_Display	*header_;	// Page header
@@ -56,11 +59,13 @@ class RasterView : public Fl_Double_Window
   static void	close_cb(Fl_Widget *widget);
   static void	color_cb(RasterDisplay *display);
   static void	device_cb(Fl_Widget *widget);
+  static void	goto_cb(Fl_Widget *widget);
   static void	help_cb();
   void		init();
   void		load_attrs();
   static void	next_cb(Fl_Widget *widget);
   static void	open_cb();
+  static void	prev_cb(Fl_Widget *widget);
   static void	quit_cb();
   static void	reopen_cb(Fl_Widget *widget);
   void		set_filename(const char *f);

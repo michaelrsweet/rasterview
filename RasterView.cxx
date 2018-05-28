@@ -280,6 +280,28 @@ RasterView::device_cb(
 
 
 //
+// 'RasterView::goto_cb()' - Show the specified page.
+//
+
+void
+RasterView::goto_cb(Fl_Widget *widget)	// I - Next button
+{
+  RasterView	*view;			// I - Window
+
+
+  view = (RasterView *)(widget->window());
+
+  if (view->loading_)
+    return;
+
+  view->loading_ = 1;
+    view->display_->page(atoi(view->page_input_->value()));
+    view->load_attrs();
+  view->loading_ = 0;
+}
+
+
+//
 // 'RasterView::handle()' - Handle global shortcuts...
 //
 
@@ -323,6 +345,7 @@ RasterView::help_cb()
 void
 RasterView::init()
 {
+  Fl_Group *sub_group;
   static Fl_Menu_Item	items[] =	// Menu items
   {
     {"&File", 0, 0, 0, FL_SUBMENU },
@@ -364,19 +387,29 @@ RasterView::init()
   display_ = new RasterDisplay(0, MENU_OFFSET, w(), h() - MENU_OFFSET - 25);
   display_->callback((Fl_Callback *)color_cb);
 
-  buttons_ = new Fl_Group(0, h() - 25, w(), 25, "        -/=/0/1/2/3/4 to zoom");
-  buttons_->align((Fl_Align)(FL_ALIGN_LEFT | FL_ALIGN_INSIDE));
-    next_button_ = new Fl_Button(0, h() - 25, 25, 25, "@>");
-    next_button_->callback((Fl_Callback *)next_cb);
-    next_button_->deactivate();
-    next_button_->shortcut(' ');
+  buttons_ = new Fl_Group(0, h() - 25, w(), 25, "-/=/0/1/2/3/4 to zoom");
+  buttons_->align((Fl_Align)(FL_ALIGN_CENTER | FL_ALIGN_INSIDE));
+    sub_group = new Fl_Group(0, h() - 25, 80, 25);
+      prev_button_ = new Fl_Button(0, h() - 25, 25, 25, "@<");
+      prev_button_->callback((Fl_Callback *)prev_cb);
+      prev_button_->deactivate();
+      prev_button_->shortcut('\b');
 
-    attrs_button_ = new Fl_Button(25, h() - 25, w() - 25, 25, "Show Attributes @>");
-    attrs_button_->align((Fl_Align)(FL_ALIGN_INSIDE | FL_ALIGN_RIGHT));
-    attrs_button_->box(FL_NO_BOX);
+      page_input_ = new Fl_Int_Input(25, h() - 25, 30, 25);
+      page_input_->callback((Fl_Callback *)goto_cb);
+
+      next_button_ = new Fl_Button(55, h() - 25, 25, 25, "@>");
+      next_button_->callback((Fl_Callback *)next_cb);
+      next_button_->deactivate();
+      next_button_->shortcut(' ');
+    sub_group->resizable(page_input_);
+    sub_group->end();
+
+    attrs_button_ = new Fl_Button(w() - 140, h() - 25, 140, 25, "Show Attributes @>");
+    attrs_button_->align((Fl_Align)(FL_ALIGN_INSIDE | FL_ALIGN_CENTER));
     attrs_button_->callback((Fl_Callback *)attrs_cb);
     attrs_button_->shortcut(FL_COMMAND + 'a');
-  buttons_->resizable(attrs_button_);
+  buttons_->resizable(sub_group);
   buttons_->end();
 
   attributes_ = new Fl_Group(w(), 0, ATTRS_WIDTH, h());
@@ -846,6 +879,22 @@ RasterView::load_attrs()
       colors_[i]->deactivate();
   }
   header_->redraw();
+
+  // Update navigation controls...
+  char val[255];
+
+  snprintf(val, sizeof(val), "%d", display_->page());
+  page_input_->value(val);
+
+  if (display_->page() == 1)
+    prev_button_->deactivate();
+  else
+    prev_button_->activate();
+
+  if (display_->page() >= display_->num_pages())
+    next_button_->deactivate();
+  else
+    next_button_->activate();
 }
 
 
@@ -868,11 +917,6 @@ RasterView::next_cb(Fl_Widget *widget)	// I - Next button
     view->display_->load_page();
     view->load_attrs();
   view->loading_ = 0;
-
-  if (view->display_->eof())
-    view->next_button_->deactivate();
-  else
-    view->next_button_->activate();
 }
 
 
@@ -932,6 +976,28 @@ RasterView::open_cb()
 
 
 //
+// 'RasterView::prev_cb()' - Show the previous page.
+//
+
+void
+RasterView::prev_cb(Fl_Widget *widget)	// I - Next button
+{
+  RasterView	*view;			// I - Window
+
+
+  view = (RasterView *)(widget->window());
+
+  if (view->loading_)
+    return;
+
+  view->loading_ = 1;
+    view->display_->page(view->display_->page() - 1);
+    view->load_attrs();
+  view->loading_ = 0;
+}
+
+
+//
 // 'RasterView::quit_cb()' - Quit the application.
 //
 
@@ -965,11 +1031,6 @@ RasterView::reopen_cb(Fl_Widget *widget)// I - Menu or window
     view->display_->open_file(view->filename_);
     view->load_attrs();
   view->loading_ = 0;
-
-  if (view->display_->eof())
-    view->next_button_->deactivate();
-  else
-    view->next_button_->activate();
 }
 
 

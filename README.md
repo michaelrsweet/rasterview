@@ -1,4 +1,4 @@
-# RasterView v1.6
+# RasterView v1.7
 
 RasterView is a CUPS, PWG, and Apple raster file viewing application. It
 basically allows you to look at the raster data produced by any of the standard
@@ -51,6 +51,12 @@ Unless required by applicable law or agreed to in writing, software distributed
 under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 CONDITIONS OF ANY KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations under the License.
+
+
+## Changes in v1.7 - 2018-05-28
+
+- Page controls updated to allow navigation to the previous page and to selected
+  pages.
 
 
 ## Changes in v1.6 - 2018-01-21

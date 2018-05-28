@@ -22,6 +22,10 @@
 #  include <zlib.h>
 
 
+// Maximum pages
+#  define RASTER_MAX_PAGES 1000
+
+
 //
 // Display control modes...
 //
@@ -43,9 +47,11 @@ class RasterDisplay : public Fl_Group
 {
   cups_raster_t		*ras_;		// Raster stream
   gzFile		fp_;		// File pointer
-  int			ras_eof_;	// End of file?
-  cups_page_header2_t	header_,	// Page header for current page
-			next_header_;	// Next page header
+  int			page_,		// Current page number
+			num_pages_;	// Number of pages
+  z_off_t		pages_[RASTER_MAX_PAGES];
+					// Page offsets
+  cups_page_header2_t	header_;	// Page header for current page
   int			bpc_,		// Bytes per color
 			bpp_;		// Bytes per pixel
   uchar			*pixels_;	// Pixel buffer
@@ -95,7 +101,6 @@ class RasterDisplay : public Fl_Group
   int			close_file();
   void			device_color(int n, Fl_Color c) { uchar r,g,b; Fl::get_color(c, r, g, b); device_colors_[n][0] = 255-r; device_colors_[n][1] = 255-g; device_colors_[n][2] = 255-b; save_colors();}
   Fl_Color		device_color(int n) { return (fl_rgb_color(255-device_colors_[n][0], 255-device_colors_[n][1], 255-device_colors_[n][2])); }
-  int			eof() const { return ras_eof_; }
   uchar			*get_color(int X, int Y);
   uchar			*get_pixel(int X, int Y);
   int			handle(int event);
@@ -106,6 +111,9 @@ class RasterDisplay : public Fl_Group
   int			mode() const { return mode_; }
   int			mouse_x() const { return mouse_x_; }
   int			mouse_y() const { return mouse_y_; }
+  int			num_pages() const { return num_pages_; }
+  int			page(void);
+  void			page(int number);
   void			position(int X, int Y);
   void			resize(int X, int Y, int W, int H);
   void			scale(float factor);
