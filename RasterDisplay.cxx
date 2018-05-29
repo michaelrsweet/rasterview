@@ -387,25 +387,6 @@ RasterDisplay::handle(int event)	// I - Event to handle
             case '4' : // 400%
 	        scale(4.0f);
 		return (1);
-
-            case 'p' : // Pan
-	        mode(RASTER_MODE_PAN);
-		fl_cursor(FL_CURSOR_MOVE);
-		return (1);
-
-            case 'z' : // Zoom in/out
-	        if (Fl::event_state(FL_SHIFT))
-	          mode(RASTER_MODE_ZOOM_OUT);
-		else
-	          mode(RASTER_MODE_ZOOM_IN);
-
-		fl_cursor(FL_CURSOR_DEFAULT);
-		return (1);
-
-            case 'c' : // Click/color
-	        mode(RASTER_MODE_CLICK);
-		fl_cursor(FL_CURSOR_CROSS);
-		return (1);
 	  }
 	  break;
 
@@ -1093,7 +1074,9 @@ RasterDisplay::open_file(
   {
     num_pages_ ++;
 
+#ifdef DEBUG
     fprintf(stderr, "PAGE %d: %ux%ux%u @ %ld\n", num_pages_, header.cupsWidth, header.cupsHeight, header.cupsBitsPerPixel, (long)pages_[num_pages_ - 1]);
+#endif // DEBUG
 
     if (header.cupsBytesPerLine > bufsize)
     {

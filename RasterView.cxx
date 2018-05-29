@@ -19,6 +19,14 @@
 #include <FL/Fl_Native_File_Chooser.H>
 #include <FL/x.H>
 
+#include "eyedropper.xbm"
+#include "left.xbm"
+#include "list.xbm"
+#include "move.xbm"
+#include "right.xbm"
+#include "zoom-in.xbm"
+#include "zoom-out.xbm"
+
 
 //
 // Constants...
@@ -108,13 +116,11 @@ RasterView::attrs_cb(Fl_Widget *widget)	// I - Button
 
   if (view->attributes_->visible())
   {
-    view->attrs_button_->label("Show Attributes @>");
     view->attributes_->hide();
     view->resize(view->x(), view->y(), view->w() - ATTRS_WIDTH, view->h());
   }
   else
   {
-    view->attrs_button_->label("Hide Attributes @<");
     view->attributes_->show();
     view->resize(view->x(), view->y(), view->w() + ATTRS_WIDTH, view->h());
   }
@@ -390,7 +396,9 @@ RasterView::init()
   buttons_ = new Fl_Group(0, h() - 25, w(), 25, "-/=/0/1/2/3/4 to zoom");
   buttons_->align((Fl_Align)(FL_ALIGN_CENTER | FL_ALIGN_INSIDE));
     sub_group = new Fl_Group(0, h() - 25, 80, 25);
-      prev_button_ = new Fl_Button(0, h() - 25, 25, 25, "@<");
+      prev_button_ = new Fl_Button(0, h() - 25, 25, 25);
+      prev_button_->image(new Fl_Bitmap(left_bits, left_width, left_height));
+      prev_button_->tooltip("Show Previous Page");
       prev_button_->callback((Fl_Callback *)prev_cb);
       prev_button_->deactivate();
       prev_button_->shortcut('\b');
@@ -398,14 +406,59 @@ RasterView::init()
       page_input_ = new Fl_Int_Input(25, h() - 25, 30, 25);
       page_input_->callback((Fl_Callback *)goto_cb);
 
-      next_button_ = new Fl_Button(55, h() - 25, 25, 25, "@>");
+      next_button_ = new Fl_Button(55, h() - 25, 25, 25);
+      next_button_->image(new Fl_Bitmap(right_bits, right_width, right_height));
+      next_button_->tooltip("Show Next Page");
       next_button_->callback((Fl_Callback *)next_cb);
       next_button_->deactivate();
       next_button_->shortcut(' ');
     sub_group->resizable(page_input_);
     sub_group->end();
 
-    attrs_button_ = new Fl_Button(w() - 140, h() - 25, 140, 25, "Show Attributes @>");
+    sub_group = new Fl_Group(w() - 125, h() - 25, 100, 25);
+      zoom_in_button_ = new Fl_Button(w() - 125, h() - 25, 25, 25);
+      zoom_in_button_->image(new Fl_Bitmap(zoom_in_bits, zoom_in_width, zoom_in_height));
+      zoom_in_button_->tooltip("Click to Zoom");
+      zoom_in_button_->type(FL_RADIO_BUTTON);
+      zoom_in_button_->selection_color(FL_BLACK);
+      zoom_in_button_->value(1);
+      zoom_in_button_->align((Fl_Align)(FL_ALIGN_INSIDE | FL_ALIGN_CENTER));
+      zoom_in_button_->callback((Fl_Callback *)mode_cb);
+      zoom_in_button_->shortcut('z');
+
+      zoom_out_button_ = new Fl_Button(w() - 100, h() - 25, 25, 25);
+      zoom_out_button_->image(new Fl_Bitmap(zoom_out_bits, zoom_out_width, zoom_out_height));
+      zoom_out_button_->tooltip("Click to Zoom");
+      zoom_out_button_->type(FL_RADIO_BUTTON);
+      zoom_out_button_->selection_color(FL_BLACK);
+      zoom_out_button_->align((Fl_Align)(FL_ALIGN_INSIDE | FL_ALIGN_CENTER));
+      zoom_out_button_->callback((Fl_Callback *)mode_cb);
+      zoom_out_button_->shortcut('Z');
+
+      pan_button_ = new Fl_Button(w() - 75, h() - 25, 25, 25);
+      pan_button_->image(new Fl_Bitmap(move_bits, move_width, move_height));
+      pan_button_->tooltip("Click and Drag to Pan");
+      pan_button_->type(FL_RADIO_BUTTON);
+      pan_button_->selection_color(FL_BLACK);
+      pan_button_->align((Fl_Align)(FL_ALIGN_INSIDE | FL_ALIGN_CENTER));
+      pan_button_->callback((Fl_Callback *)mode_cb);
+      pan_button_->shortcut('p');
+
+      color_button_ = new Fl_Button(w() - 50, h() - 25, 25, 25);
+      color_button_->image(new Fl_Bitmap(eyedropper_bits, eyedropper_width, eyedropper_height));
+      color_button_->tooltip("Click to Show Color Values");
+      color_button_->type(FL_RADIO_BUTTON);
+      color_button_->selection_color(FL_BLACK);
+      color_button_->align((Fl_Align)(FL_ALIGN_INSIDE | FL_ALIGN_CENTER));
+      color_button_->callback((Fl_Callback *)mode_cb);
+      color_button_->shortcut('c');
+    sub_group->end();
+
+    attrs_button_ = new Fl_Button(w() - 25, h() - 25, 25, 25);
+    attrs_button_->image(new Fl_Bitmap(list_bits, list_width, list_height));
+    attrs_button_->tooltip("Hide/Show Page Attributes");
+    attrs_button_->type(FL_TOGGLE_BUTTON);
+    attrs_button_->selection_color(FL_BLACK);
     attrs_button_->align((Fl_Align)(FL_ALIGN_INSIDE | FL_ALIGN_CENTER));
     attrs_button_->callback((Fl_Callback *)attrs_cb);
     attrs_button_->shortcut(FL_COMMAND + 'a');
@@ -895,6 +948,27 @@ RasterView::load_attrs()
     next_button_->deactivate();
   else
     next_button_->activate();
+}
+
+
+//
+// 'mode_cb()' - Change mode.
+//
+
+void
+RasterView::mode_cb(Fl_Widget *widget)
+{
+  RasterView *view = (RasterView *)widget->window();
+
+
+  if (widget == view->zoom_in_button_)
+    view->display_->mode(RASTER_MODE_ZOOM_IN);
+  else if (widget == view->zoom_out_button_)
+    view->display_->mode(RASTER_MODE_ZOOM_OUT);
+  else if (widget == view->pan_button_)
+    view->display_->mode(RASTER_MODE_PAN);
+  else
+    view->display_->mode(RASTER_MODE_CLICK);
 }
 
 

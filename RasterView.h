@@ -18,7 +18,6 @@
 #  include "RasterDisplay.h"
 #  include <FL/Fl_Double_Window.H>
 #  include <FL/Fl_Button.H>
-#  include <FL/Fl_Check_Button.H>
 #  include <FL/Fl_Int_Input.H>
 #  include <FL/Fl_Sys_Menu_Bar.H>
 #  include <FL/Fl_Text_Display.H>
@@ -41,6 +40,10 @@ class RasterView : public Fl_Double_Window
   Fl_Group		*buttons_;	// Button bar
   Fl_Button		*prev_button_,	// Previous page button
 			*next_button_,	// Next page button
+			*zoom_in_button_,	// Zoom-in mode button
+			*zoom_out_button_,	// Zoom-out mode button
+			*pan_button_,	// Pan mode button
+			*color_button_,	// Color inspector mode button
 			*attrs_button_;	// Toggle attributes button
   Fl_Int_Input		*page_input_;	// Page number control
   Fl_Group		*attributes_;	// Attributes pane
@@ -63,6 +66,7 @@ class RasterView : public Fl_Double_Window
   static void	help_cb();
   void		init();
   void		load_attrs();
+  static void	mode_cb(Fl_Widget *widget);
   static void	next_cb(Fl_Widget *widget);
   static void	open_cb();
   static void	prev_cb(Fl_Widget *widget);

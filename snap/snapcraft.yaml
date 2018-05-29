@@ -1,5 +1,5 @@
 name: rasterview
-version: 1.6
+version: 1.7
 summary: CUPS/PWG/Apple Raster File Viewer
 description: |
   RasterView is a CUPS, PWG, and Apple raster file viewer.  It basically allows
