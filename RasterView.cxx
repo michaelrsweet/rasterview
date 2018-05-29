@@ -390,24 +390,26 @@ RasterView::init()
   menubar_ = new Fl_Sys_Menu_Bar(0, 0, w(), 25);
   menubar_->menu(items);
 
-  display_ = new RasterDisplay(0, MENU_OFFSET, w(), h() - MENU_OFFSET - 25);
+  display_ = new RasterDisplay(0, MENU_OFFSET, w(), h() - MENU_OFFSET - 30);
   display_->callback((Fl_Callback *)color_cb);
 
-  buttons_ = new Fl_Group(0, h() - 25, w(), 25, "-/=/0/1/2/3/4 to zoom");
+  buttons_ = new Fl_Group(0, h() - 30, w(), 30, "-/=/0/1/2/3/4 to zoom");
   buttons_->align((Fl_Align)(FL_ALIGN_CENTER | FL_ALIGN_INSIDE));
-    sub_group = new Fl_Group(0, h() - 25, 80, 25);
-      prev_button_ = new Fl_Button(0, h() - 25, 25, 25);
+    sub_group = new Fl_Group(0, h() - 30, 80, 30);
+      prev_button_ = new Fl_Button(0, h() - 30, 25, 30);
       prev_button_->image(new Fl_Bitmap(left_bits, left_width, left_height));
+      prev_button_->box(FL_FLAT_BOX);
       prev_button_->tooltip("Show Previous Page");
       prev_button_->callback((Fl_Callback *)prev_cb);
       prev_button_->deactivate();
       prev_button_->shortcut('\b');
 
-      page_input_ = new Fl_Int_Input(25, h() - 25, 30, 25);
+      page_input_ = new Fl_Int_Input(25, h() - 30, 30, 30);
       page_input_->callback((Fl_Callback *)goto_cb);
 
-      next_button_ = new Fl_Button(55, h() - 25, 25, 25);
+      next_button_ = new Fl_Button(55, h() - 30, 25, 30);
       next_button_->image(new Fl_Bitmap(right_bits, right_width, right_height));
+      next_button_->box(FL_FLAT_BOX);
       next_button_->tooltip("Show Next Page");
       next_button_->callback((Fl_Callback *)next_cb);
       next_button_->deactivate();
@@ -415,9 +417,10 @@ RasterView::init()
     sub_group->resizable(page_input_);
     sub_group->end();
 
-    sub_group = new Fl_Group(w() - 125, h() - 25, 100, 25);
-      zoom_in_button_ = new Fl_Button(w() - 125, h() - 25, 25, 25);
+    sub_group = new Fl_Group(w() - 150, h() - 30, 120, 30);
+      zoom_in_button_ = new Fl_Button(w() - 150, h() - 30, 30, 30);
       zoom_in_button_->image(new Fl_Bitmap(zoom_in_bits, zoom_in_width, zoom_in_height));
+      zoom_in_button_->box(FL_FLAT_BOX);
       zoom_in_button_->tooltip("Click to Zoom");
       zoom_in_button_->type(FL_RADIO_BUTTON);
       zoom_in_button_->selection_color(FL_BLACK);
@@ -426,8 +429,9 @@ RasterView::init()
       zoom_in_button_->callback((Fl_Callback *)mode_cb);
       zoom_in_button_->shortcut('z');
 
-      zoom_out_button_ = new Fl_Button(w() - 100, h() - 25, 25, 25);
+      zoom_out_button_ = new Fl_Button(w() - 120, h() - 30, 30, 30);
       zoom_out_button_->image(new Fl_Bitmap(zoom_out_bits, zoom_out_width, zoom_out_height));
+      zoom_out_button_->box(FL_FLAT_BOX);
       zoom_out_button_->tooltip("Click to Zoom");
       zoom_out_button_->type(FL_RADIO_BUTTON);
       zoom_out_button_->selection_color(FL_BLACK);
@@ -435,7 +439,7 @@ RasterView::init()
       zoom_out_button_->callback((Fl_Callback *)mode_cb);
       zoom_out_button_->shortcut('Z');
 
-      pan_button_ = new Fl_Button(w() - 75, h() - 25, 25, 25);
+      pan_button_ = new Fl_Button(w() - 90, h() - 30, 30, 30);
       pan_button_->image(new Fl_Bitmap(move_bits, move_width, move_height));
       pan_button_->tooltip("Click and Drag to Pan");
       pan_button_->type(FL_RADIO_BUTTON);
@@ -444,8 +448,9 @@ RasterView::init()
       pan_button_->callback((Fl_Callback *)mode_cb);
       pan_button_->shortcut('p');
 
-      color_button_ = new Fl_Button(w() - 50, h() - 25, 25, 25);
+      color_button_ = new Fl_Button(w() - 60, h() - 30, 30, 30);
       color_button_->image(new Fl_Bitmap(eyedropper_bits, eyedropper_width, eyedropper_height));
+      color_button_->box(FL_FLAT_BOX);
       color_button_->tooltip("Click to Show Color Values");
       color_button_->type(FL_RADIO_BUTTON);
       color_button_->selection_color(FL_BLACK);
@@ -454,8 +459,9 @@ RasterView::init()
       color_button_->shortcut('c');
     sub_group->end();
 
-    attrs_button_ = new Fl_Button(w() - 25, h() - 25, 25, 25);
+    attrs_button_ = new Fl_Button(w() - 30, h() - 30, 30, 30);
     attrs_button_->image(new Fl_Bitmap(list_bits, list_width, list_height));
+    attrs_button_->box(FL_FLAT_BOX);
     attrs_button_->tooltip("Hide/Show Page Attributes");
     attrs_button_->type(FL_TOGGLE_BUTTON);
     attrs_button_->selection_color(FL_BLACK);
@@ -1132,8 +1138,8 @@ RasterView::resize(int X,		// I - New X position
     base_W = W;
 
   menubar_->resize(0, 0, base_W, 25);
-  display_->resize(0, MENU_OFFSET, base_W, H - MENU_OFFSET - 25);
-  buttons_->resize(0, H - 25, base_W, 25);
+  display_->resize(0, MENU_OFFSET, base_W, H - MENU_OFFSET - 30);
+  buttons_->resize(0, H - 30, base_W, 30);
 }
 
 
