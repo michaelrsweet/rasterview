@@ -251,7 +251,7 @@ RasterView::color_cb(
     }
   }
 
-  view->buttons_->label(view->pixel_);
+  view->status_->label(view->pixel_);
 }
 
 
@@ -416,8 +416,8 @@ RasterView::init()
     sub_group->resizable(page_input_);
     sub_group->end();
 
-    Fl_Box *box = new Fl_Box(80, h() - 30, w() - 250, 30, "-/=/0/1/2/3/4 to zoom");
-    box->align((Fl_Align)(FL_ALIGN_CENTER | FL_ALIGN_INSIDE));
+    status_ = new Fl_Box(80, h() - 30, w() - 250, 30, "-/=/0/1/2/3/4 to zoom");
+    status_->align((Fl_Align)(FL_ALIGN_CENTER | FL_ALIGN_INSIDE));
 
     sub_group = new Fl_Group(w() - 170, h() - 30, 120, 30);
       zoom_in_button_ = new Fl_Button(w() - 170, h() - 30, 30, 30);
@@ -472,7 +472,7 @@ RasterView::init()
     attrs_button_->callback((Fl_Callback *)attrs_cb);
     attrs_button_->shortcut(FL_COMMAND + 'a');
 
-  buttons_->resizable(box);
+  buttons_->resizable(status_);
   buttons_->end();
 
   attributes_ = new Fl_Group(w(), 0, ATTRS_WIDTH, h());
@@ -511,6 +511,8 @@ RasterView::init()
   loading_ = 0;
   next_    = first_;
   first_   = this;
+
+  Fl::focus(display_);
 }
 
 

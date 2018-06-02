@@ -16,6 +16,7 @@
 #include <FL/fl_draw.H>
 #include <FL/Fl_Preferences.H>
 #include <stdio.h>
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -104,6 +105,7 @@ RasterDisplay::RasterDisplay(
   memset(&header_, 0, sizeof(header_));
 
   fp_           = NULL;
+  filename_     = NULL;
   ras_          = NULL;
   pixels_       = NULL;
   alloc_pixels_ = 0;
@@ -144,13 +146,19 @@ RasterDisplay::close_file()
   if (ras_)
   {
     cupsRasterClose(ras_);
-    ras_     = NULL;
+    ras_ = NULL;
   }
 
   if (fp_)
   {
     gzclose(fp_);
     fp_ = NULL;
+  }
+
+  if (filename_)
+  {
+    free((void *)filename_);
+    filename_ = NULL;
   }
 
   if (pixels_)
@@ -656,7 +664,6 @@ RasterDisplay::load_page()
   if (!cupsRasterReadHeader2(ras_, &header_))
   {
     fl_alert("cupsRasterReadHeader() failed!");
-    close_file();
     return (0);
   }
 
@@ -665,7 +672,6 @@ RasterDisplay::load_page()
   if (header_.cupsColorOrder == CUPS_ORDER_PLANAR)
   {
     fl_alert("Sorry, we don't support planar raster data at this time!");
-    close_file();
     return (0);
   }
 
@@ -757,7 +763,6 @@ RasterDisplay::load_page()
   {
     fl_alert("Sorry, image dimensions are out of range (%ux%u)!",
              header_.cupsWidth, header_.cupsHeight);
-    close_file();
     return (0);
   }
 
@@ -769,7 +774,6 @@ RasterDisplay::load_page()
   {
     fl_alert("Sorry, image dimensions are out of range (%ux%u)!",
              header_.cupsWidth, header_.cupsHeight);
-    close_file();
     return (0);
   }
 
@@ -1066,6 +1070,8 @@ RasterDisplay::open_file(
     return (0);
   }
 
+  filename_ = strdup(filename);
+
   // Figure out the number of pages and their offsets...
   num_pages_ = 0;
   pages_[0]  = gztell(fp_);
@@ -1128,6 +1134,17 @@ RasterDisplay::page(int number)		// I - New page
     this->load_page();
   else if (number != page_)
   {
+#if 0
+    if (number < page_)
+    {
+      cupsRasterClose(ras_);
+      gzclose(fp_);
+
+      fp_  = gzopen(filename_, "rb");
+      ras_ = cupsRasterOpenIO((cups_raster_iocb_t)raster_cb, fp_, CUPS_RASTER_READ);
+    }
+#endif // 0
+
     gzseek(fp_, pages_[number - 1], SEEK_SET);
     rasterReset(ras_);
 

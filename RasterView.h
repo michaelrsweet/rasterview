@@ -17,6 +17,7 @@
 
 #  include "RasterDisplay.h"
 #  include <FL/Fl_Double_Window.H>
+#  include <FL/Fl_Box.H>
 #  include <FL/Fl_Button.H>
 #  include <FL/Fl_Int_Input.H>
 #  include <FL/Fl_Sys_Menu_Bar.H>
@@ -38,6 +39,7 @@ class RasterView : public Fl_Double_Window
   Fl_Sys_Menu_Bar	*menubar_;	// Menubar
   RasterDisplay		*display_;	// Display widget
   Fl_Group		*buttons_;	// Button bar
+  Fl_Box		*status_;	// Status box
   Fl_Button		*prev_button_,	// Previous page button
 			*next_button_,	// Next page button
 			*zoom_in_button_,	// Zoom-in mode button

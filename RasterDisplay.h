@@ -46,6 +46,7 @@ enum
 class RasterDisplay : public Fl_Group
 {
   cups_raster_t		*ras_;		// Raster stream
+  const char		*filename_;	// Filename
   gzFile		fp_;		// File pointer
   int			page_,		// Current page number
 			num_pages_;	// Number of pages
