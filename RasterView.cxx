@@ -393,8 +393,7 @@ RasterView::init()
   display_ = new RasterDisplay(0, MENU_OFFSET, w(), h() - MENU_OFFSET - 30);
   display_->callback((Fl_Callback *)color_cb);
 
-  buttons_ = new Fl_Group(0, h() - 30, w(), 30, "-/=/0/1/2/3/4 to zoom");
-  buttons_->align((Fl_Align)(FL_ALIGN_CENTER | FL_ALIGN_INSIDE));
+  buttons_ = new Fl_Group(0, h() - 30, w(), 30);
     sub_group = new Fl_Group(0, h() - 30, 80, 30);
       prev_button_ = new Fl_Button(0, h() - 30, 25, 30);
       prev_button_->image(new Fl_Bitmap(left_bits, left_width, left_height));
@@ -417,8 +416,11 @@ RasterView::init()
     sub_group->resizable(page_input_);
     sub_group->end();
 
-    sub_group = new Fl_Group(w() - 150, h() - 30, 120, 30);
-      zoom_in_button_ = new Fl_Button(w() - 150, h() - 30, 30, 30);
+    Fl_Box *box = new Fl_Box(80, h() - 30, w() - 250, 30, "-/=/0/1/2/3/4 to zoom");
+    box->align((Fl_Align)(FL_ALIGN_CENTER | FL_ALIGN_INSIDE));
+
+    sub_group = new Fl_Group(w() - 170, h() - 30, 120, 30);
+      zoom_in_button_ = new Fl_Button(w() - 170, h() - 30, 30, 30);
       zoom_in_button_->image(new Fl_Bitmap(zoom_in_bits, zoom_in_width, zoom_in_height));
       zoom_in_button_->box(FL_FLAT_BOX);
       zoom_in_button_->tooltip("Click to Zoom");
@@ -429,7 +431,7 @@ RasterView::init()
       zoom_in_button_->callback((Fl_Callback *)mode_cb);
       zoom_in_button_->shortcut('z');
 
-      zoom_out_button_ = new Fl_Button(w() - 120, h() - 30, 30, 30);
+      zoom_out_button_ = new Fl_Button(w() - 140, h() - 30, 30, 30);
       zoom_out_button_->image(new Fl_Bitmap(zoom_out_bits, zoom_out_width, zoom_out_height));
       zoom_out_button_->box(FL_FLAT_BOX);
       zoom_out_button_->tooltip("Click to Zoom");
@@ -439,8 +441,9 @@ RasterView::init()
       zoom_out_button_->callback((Fl_Callback *)mode_cb);
       zoom_out_button_->shortcut('Z');
 
-      pan_button_ = new Fl_Button(w() - 90, h() - 30, 30, 30);
+      pan_button_ = new Fl_Button(w() - 110, h() - 30, 30, 30);
       pan_button_->image(new Fl_Bitmap(move_bits, move_width, move_height));
+      pan_button_->box(FL_FLAT_BOX);
       pan_button_->tooltip("Click and Drag to Pan");
       pan_button_->type(FL_RADIO_BUTTON);
       pan_button_->selection_color(FL_BLACK);
@@ -448,7 +451,7 @@ RasterView::init()
       pan_button_->callback((Fl_Callback *)mode_cb);
       pan_button_->shortcut('p');
 
-      color_button_ = new Fl_Button(w() - 60, h() - 30, 30, 30);
+      color_button_ = new Fl_Button(w() - 80, h() - 30, 30, 30);
       color_button_->image(new Fl_Bitmap(eyedropper_bits, eyedropper_width, eyedropper_height));
       color_button_->box(FL_FLAT_BOX);
       color_button_->tooltip("Click to Show Color Values");
@@ -468,7 +471,8 @@ RasterView::init()
     attrs_button_->align((Fl_Align)(FL_ALIGN_INSIDE | FL_ALIGN_CENTER));
     attrs_button_->callback((Fl_Callback *)attrs_cb);
     attrs_button_->shortcut(FL_COMMAND + 'a');
-  buttons_->resizable(sub_group);
+
+  buttons_->resizable(box);
   buttons_->end();
 
   attributes_ = new Fl_Group(w(), 0, ATTRS_WIDTH, h());

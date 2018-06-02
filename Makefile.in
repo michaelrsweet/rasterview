@@ -64,7 +64,7 @@ clean:
 
 
 depend:
-	makedepend -Y -f .depend $(OBJS:.o=.cxx)
+	makedepend -Y -f .depend *.c *.cxx
 
 
 distclean:	clean

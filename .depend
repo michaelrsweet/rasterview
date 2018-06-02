@@ -1,0 +1,8 @@
+# DO NOT DELETE
+
+error.o: raster.h
+raster.o: raster.h
+RasterDisplay.o: RasterDisplay.h raster.h
+RasterView.o: RasterView.h RasterDisplay.h raster.h eyedropper.xbm left.xbm
+RasterView.o: list.xbm move.xbm right.xbm zoom-in.xbm zoom-out.xbm
+main.o: RasterView.h RasterDisplay.h raster.h
