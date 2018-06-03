@@ -57,6 +57,8 @@
 "click or drag the mouse and view the raw colors on the page.</P>\n" \
 "<H2>Keyboard Shortcuts</H2>\n" \
 "<UL>\n" \
+"<LI><CODE>Spacebar</CODE>: Show next page</LI>\n" \
+"<LI><CODE>Backspace/Delete</CODE>: Show previous page</LI>\n" \
 "<LI><CODE>0</CODE>: Zoom to fit</LI>\n" \
 "<LI><CODE>1</CODE>: Zoom 100%</LI>\n" \
 "<LI><CODE>2</CODE>: Zoom 200%</LI>\n" \
@@ -300,6 +302,8 @@ RasterView::goto_cb(Fl_Widget *widget)	// I - Next button
   if (view->loading_)
     return;
 
+  Fl::focus(view->display_);
+
   view->loading_ = 1;
     view->display_->page(atoi(view->page_input_->value()));
     view->load_attrs();
@@ -401,10 +405,12 @@ RasterView::init()
       prev_button_->tooltip("Show Previous Page");
       prev_button_->callback((Fl_Callback *)prev_cb);
       prev_button_->deactivate();
-      prev_button_->shortcut('\b');
+      prev_button_->shortcut(FL_BackSpace);
 
       page_input_ = new Fl_Int_Input(25, h() - 30, 30, 30);
       page_input_->callback((Fl_Callback *)goto_cb);
+      page_input_->clear_visible_focus();
+      page_input_->when(FL_WHEN_RELEASE | FL_WHEN_ENTER_KEY);
 
       next_button_ = new Fl_Button(55, h() - 30, 25, 30);
       next_button_->image(new Fl_Bitmap(right_bits, right_width, right_height));

@@ -419,6 +419,7 @@ extern cups_raster_t	*cupsRasterOpenIO(cups_raster_iocb_t iocb, void *ctx,
 /*extern int		cupsRasterInitPWGHeader(cups_page_header2_t *h, pwg_media_t *media, const char *type, int xdpi, int ydpi, const char *sides, const char *sheet_back) _CUPS_API_2_2;*/
 
 /**** RasterView-specific ****/
+extern size_t		rasterOffset(cups_raster_t *r);
 extern void		rasterReset(cups_raster_t *r);
 
 #  ifdef __cplusplus

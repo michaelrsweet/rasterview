@@ -53,10 +53,11 @@ CONDITIONS OF ANY KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations under the License.
 
 
-## Changes in v1.7 - 2018-05-28
+## Changes in v1.7 - 2018-06-03
 
-- Page controls updated to allow navigation to the previous page and to selected
-  pages.
+- Updated the page controls to allow navigation to the previous page and to
+  selected pages.
+- Added mode buttons for zoom, pan, and color (to show the current mode).
 
 
 ## Changes in v1.6 - 2018-01-21

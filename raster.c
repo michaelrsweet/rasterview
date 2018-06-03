@@ -168,6 +168,17 @@ static ssize_t	cups_write_fd(void *ctx, unsigned char *buf, size_t bytes);
 
 
 /*
+ * 'rasterOffset()' - Return the offset in the read buffer.
+ */
+
+size_t					/* O - Buffered bytes */
+rasterOffset(cups_raster_t *r)		/* I - Stream */
+{
+  return (r->compressed ? r->bufend - r->bufptr : 0);
+}
+
+
+/*
  * 'rasterReset()' - Reset the read buffer after a seek.
  */
 

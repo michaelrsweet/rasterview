@@ -663,7 +663,8 @@ RasterDisplay::load_page()
 
   if (!cupsRasterReadHeader2(ras_, &header_))
   {
-    fl_alert("cupsRasterReadHeader() failed!");
+    int err;
+    fl_alert("cupsRasterReadHeader() failed: %s", gzerror(fp_, &err));
     return (0);
   }
 
@@ -1096,7 +1097,7 @@ RasterDisplay::open_file(
     if (num_pages_ >= RASTER_MAX_PAGES)
       break;
 
-    pages_[num_pages_] = gztell(fp_);
+    pages_[num_pages_] = gztell(fp_) - rasterOffset(ras_);
   }
 
   gzseek(fp_, pages_[0], SEEK_SET);
