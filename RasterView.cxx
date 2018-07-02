@@ -1149,7 +1149,10 @@ RasterView::resize(int X,		// I - New X position
   else
     base_W = W;
 
+#ifndef __APPLE__
   menubar_->resize(0, 0, base_W, 25);
+#endif /* !__APPLE__ */
+
   display_->resize(0, MENU_OFFSET, base_W, H - MENU_OFFSET - 30);
   buttons_->resize(0, H - 30, base_W, 30);
 }

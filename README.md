@@ -53,6 +53,11 @@ CONDITIONS OF ANY KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations under the License.
 
 
+## Changes in v1.7.1 - 2018-07-02
+
+- Fixed a crash bug on macOS.
+
+
 ## Changes in v1.7 - 2018-06-03
 
 - Updated the page controls to allow navigation to the previous page and to

@@ -16,7 +16,7 @@
 dnl We need at least autoconf 2.50...
 AC_PREREQ(2.60)
 
-AC_INIT([RasterView],[1.7],[https://github.com/michaelrsweet/rasterview/issues],[rasterview],[https://michaelrsweet.github.io/rasterview])
+AC_INIT([RasterView],[1.7.1],[https://github.com/michaelrsweet/rasterview/issues],[rasterview],[https://michaelrsweet.github.io/rasterview])
 
 dnl Version number...
 VERSION="AC_PACKAGE_VERSION"
@@ -69,7 +69,10 @@ if test "x$FLTKCONFIG" = x; then
 	AC_MSG_ERROR([Sorry, rasterview requires FLTK 1.1.x or later.])
 else
 	CXXFLAGS="`$FLTKCONFIG --use-images --cflags` $CXXFLAGS"
-	LIBS="`$FLTKCONFIG --use-images --ldflags` $LIBS"
+	LIBS="`$FLTKCONFIG --use-images --ldflags` `$FLTKCONFIG --use-images --libs` $LIBS"
+	if test $uname = Darwin; then
+		LIBS="$LIBS -framework AppKit -framework Foundation"
+	fi
 fi
 
 AC_SUBST(FLTKCONFIG)
