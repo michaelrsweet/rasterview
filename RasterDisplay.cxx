@@ -16,7 +16,7 @@
 #include <FL/fl_draw.H>
 #include <FL/Fl_Preferences.H>
 #include <stdio.h>
-#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
