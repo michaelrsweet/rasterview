@@ -3,7 +3,7 @@
 //
 // CUPS/PWG Raster display widget methods.
 //
-// Copyright 2002-2018 by Michael R Sweet.
+// Copyright 2002-2019 by Michael R Sweet.
 //
 // Licensed under Apache License v2.0.  See the file "LICENSE" for more
 // information.
@@ -561,7 +561,7 @@ RasterDisplay::image_cb(void  *p,	// I - Raster display widget
   inptr = display->pixels_ + (Y * display->header_.cupsWidth + X) * bpp;
 
   if (xstep == bpp && xmod == 0)
-    memcpy(D, inptr, W * bpp);
+    memcpy(D, inptr, (size_t)W * bpp);
   else if (bpp == 1)
   {
     for (; W > 0; W --)
@@ -767,9 +767,8 @@ RasterDisplay::load_page()
     return (0);
   }
 
-  int	pixelsize = header_.cupsWidth * bpp_;
-
-  long bytes = pixelsize * header_.cupsHeight;
+  long	pixelsize = header_.cupsWidth * bpp_;
+  long	bytes = pixelsize * header_.cupsHeight;
 
   if (bytes > (256 * 1024 * 1024))
   {
@@ -798,7 +797,7 @@ RasterDisplay::load_page()
   if (header_.cupsColorOrder != CUPS_ORDER_CHUNKED)
     bpc_ *= header_.cupsNumColors;
 
-  int colorsize = header_.cupsWidth * bpc_;
+  long colorsize = header_.cupsWidth * bpc_;
 
   bytes = colorsize * header_.cupsHeight;
 

@@ -41,7 +41,7 @@ standard RIP filters.  Run the following command for help:
 
 ## Legal Stuff
 
-RasterView is Copyright © 2002-2018 by Michael R Sweet.
+RasterView is Copyright © 2002-2019 by Michael R Sweet.
 
 RasterView is provided under the terms of the Apache License, Version 2.0.  A
 copy of this license can be found in the file `LICENSE`.  Additional legal
@@ -51,6 +51,11 @@ Unless required by applicable law or agreed to in writing, software distributed
 under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 CONDITIONS OF ANY KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations under the License.
+
+
+## Changes in vCURRENT
+
+- Addressed a few warnings from LGTM.
 
 
 ## Changes in v1.7.1 - 2018-07-02
