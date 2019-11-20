@@ -767,7 +767,7 @@ RasterDisplay::load_page()
     return (0);
   }
 
-  long	pixelsize = header_.cupsWidth * bpp_;
+  long	pixelsize = (long)header_.cupsWidth * bpp_;
   long	bytes = pixelsize * header_.cupsHeight;
 
   if (bytes > (256 * 1024 * 1024))
@@ -797,7 +797,7 @@ RasterDisplay::load_page()
   if (header_.cupsColorOrder != CUPS_ORDER_CHUNKED)
     bpc_ *= header_.cupsNumColors;
 
-  long colorsize = header_.cupsWidth * bpc_;
+  long colorsize = (long)header_.cupsWidth * bpc_;
 
   bytes = colorsize * header_.cupsHeight;
 
