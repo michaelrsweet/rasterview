@@ -23,7 +23,6 @@ parts:
     fltk:
         plugin: cmake
         source: https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20210319-19ae8975.tar.bz2
-        after: [desktop-gtk3]
         build-packages: [libx11-dev libcairo2-dev libxext-dev libxft-dev libxinerama-dev]
 
     main:
