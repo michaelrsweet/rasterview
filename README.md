@@ -1,4 +1,5 @@
-# RasterView v1.7
+RasterView
+==========
 
 RasterView is a CUPS, PWG, and Apple raster file viewing application. It
 basically allows you to look at the raster data produced by any of the standard
@@ -10,13 +11,14 @@ RasterView is licensed under the Apache License Version 2.0.
 
 More information can be found at:
 
-    https://michaelrsweet.github.io/rasterview
+    https://www.msweet.org/rasterview
 
 
-## Requirements
+Requirements
+------------
 
-If you plan on (re)compiling it, you'll need FLTK 1.3.x (http://www.fltk.org/)
-and a C++ compiler.
+If you plan on (re)compiling it, you'll need FLTK (<http://www.fltk.org/>) 1.1.x
+or later and a C++ compiler.
 
 
 ## How to Compile
@@ -27,7 +29,8 @@ Run the following commands:
     make
 
 
-## How to Use
+How to Use
+----------
 
 The program is called "rasterview" on UNIX/Linux and "RasterView.app" on macOS.
 Run the program and then open a raster file, or pass the filename on the
@@ -39,9 +42,10 @@ standard RIP filters.  Run the following command for help:
     tools/maketestfiles.sh help
 
 
-## Legal Stuff
+Legal Stuff
+-----------
 
-RasterView is Copyright © 2002-2019 by Michael R Sweet.
+RasterView is Copyright © 2002-2021 by Michael R Sweet.
 
 RasterView is provided under the terms of the Apache License, Version 2.0.  A
 copy of this license can be found in the file `LICENSE`.  Additional legal
@@ -53,61 +57,72 @@ CONDITIONS OF ANY KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations under the License.
 
 
-## Changes in vCURRENT
+Changes in v1.8 (Pending)
+-------------------------
 
 - Addressed a few warnings from LGTM.
+- Fixed macOS bundle information and now provide fat binaries for Intel and
+  Apple Silicon.
 
 
-## Changes in v1.7.1 - 2018-07-02
+Changes in v1.7.1 (2018-07-02)
+------------------------------
 
 - Fixed a crash bug on macOS.
 
 
-## Changes in v1.7 - 2018-06-03
+Changes in v1.7 (2018-06-03)
+----------------------------
 
 - Updated the page controls to allow navigation to the previous page and to
   selected pages.
 - Added mode buttons for zoom, pan, and color (to show the current mode).
 
 
-## Changes in v1.6 - 2018-01-21
+Changes in v1.6 (2018-01-21)
+----------------------------
 
 - Now licensed under the Apache License Version 2.0.
 - Fixed support for 16-bit per color files.
 - Added support for gzip'd raster files (Issue #7)
 
 
-## Changes in v1.5 - 2017-03-22
+Changes in v1.5 (2017-03-22)
+----------------------------
 
 - Added support for Apple raster files.
 
 
-## Changes in v1.4.1 - 2015-08-27
+Changes in v1.4.1 (2015-08-27)
+------------------------------
 
 - Fixed the dependency on strlcpy.
 
 
-## Changes in v1.4 - 2015-08-26
+Changes in v1.4 (2015-08-26)
+----------------------------
 
 - Added support for Device-N raster files.
-- Colorants can now be changed for Device-N, K, CMY, and CMYK raster
-  files.
+- Colorants can now be changed for Device-N, K, CMY, and CMYK raster files.
 - Attributes for PWG Raster files are now reported using the PWG 5102.4
   naming and contents.
 
 
-## Changes in v1.3 - 2011-05-18
+Changes in v1.3 (2011-05-18)
+----------------------------
 
 - Added support for PWG Raster files (requires CUPS 1.5 or higher)
 
 
-## Changes in v1.2.2 - 2007-06-21
+Changes in v1.2.2 (2007-06-21)
+------------------------------
 
-- Added range checks to the page reader so that pages larger than 64MB
-  or with invalid dimensions will not cause the program to crash.
+- Added range checks to the page reader so that pages larger than 64MB or with
+  invalid dimensions will not cause the program to crash.
 
 
-## Changes in v1.2.1 - 2006-09-28
+Changes in v1.2.1 (2006-09-28)
+------------------------------
 
 - Changed the default scheme to gtk+, which is available in FLTK 1.1.8
   and higher.
@@ -115,6 +130,6 @@ specific language governing permissions and limitations under the License.
   libraries.
 
 
-## Changes in v1.2 - 2006-05-13
-
+Changes in v1.2 (2006-05-13)
+----------------------------
 - First public release.

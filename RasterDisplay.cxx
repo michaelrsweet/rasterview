@@ -1,9 +1,7 @@
 //
-// "$Id: RasterDisplay.cxx 514 2015-08-26 21:39:41Z msweet $"
-//
 // CUPS/PWG Raster display widget methods.
 //
-// Copyright 2002-2019 by Michael R Sweet.
+// Copyright © 2002-2021 by Michael R Sweet.
 //
 // Licensed under Apache License v2.0.  See the file "LICENSE" for more
 // information.
@@ -2352,11 +2350,6 @@ convert_device(
 	z,				// Color
 	w,				// Width of line
 	val;				// Pixel value
-  uchar	*cptr,				// Cyan pointer
-	*mptr,				// Magenta pointer
-	*yptr,				// Yellow pointer
-	*kptr,				// Black pointer
-	bit;				// Current bit
   int	r, g, b;			// Current RGB color
 
 
