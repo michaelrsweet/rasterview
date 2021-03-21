@@ -22,6 +22,11 @@ apps:
 parts:
     fltk:
         plugin: cmake
+        cmake-parameters:
+          - -dFLTK_BUILD_TEST=OFF
+          - -dOPTION_USE_GL=OFF
+          - -dOPTION_BUILD_HTML_DOCUMENTATION=OFF
+          - -dOPTION_BUILD_PDF_DOCUMENTATION=OFF
         source: https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20210319-19ae8975.tar.bz2
         build-packages: [libx11-dev, libcairo2-dev, libxext-dev, libxft-dev, libxinerama-dev]
 
