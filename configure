@@ -4092,13 +4092,7 @@ then :
 else $as_nop
 
     CXXFLAGS="$($FLTKCONFIG --use-images --cflags) $CXXFLAGS"
-    LIBS="$($FLTKCONFIG --use-images --ldflags) $($FLTKCONFIG --use-images --libs) $LIBS"
-    if test $uname = Darwin
-then :
-
-	LIBS="$LIBS -framework AppKit -framework Foundation"
-
-fi
+    LIBS="$($FLTKCONFIG --use-images --ldflags) $LIBS"
 
 fi
 

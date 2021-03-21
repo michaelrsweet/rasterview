@@ -70,10 +70,7 @@ AS_IF([test "x$FLTKCONFIG" = x], [
     AC_MSG_ERROR([Sorry, rasterview requires FLTK 1.1.x or later.])
 ], [
     CXXFLAGS="$($FLTKCONFIG --use-images --cflags) $CXXFLAGS"
-    LIBS="$($FLTKCONFIG --use-images --ldflags) $($FLTKCONFIG --use-images --libs) $LIBS"
-    AS_IF([test $uname = Darwin], [
-	LIBS="$LIBS -framework AppKit -framework Foundation"
-    ])
+    LIBS="$($FLTKCONFIG --use-images --ldflags) $LIBS"
 ])
 
 AC_SUBST([FLTKCONFIG])
