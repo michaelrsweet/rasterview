@@ -1,7 +1,7 @@
 #
 # EPM list file for rasterview, a CUPS/PWG Raster viewing program.
 #
-# Copyright © 2002-2018 by Michael R Sweet
+# Copyright © 2002-2021 by Michael R Sweet
 #
 # Licensed under Apache License v2.0.  See the file "LICENSE" for more
 # information.
@@ -10,7 +10,7 @@
 # Product information
 %product CUPS Raster Viewer
 %version @VERSION@
-%copyright 2002-2018 by Michael R Sweet
+%copyright 2002-2021 by Michael R Sweet
 %vendor Michael R Sweet
 %license LICENSE
 %readme README

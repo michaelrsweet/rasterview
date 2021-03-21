@@ -1,5 +1,5 @@
 name: rasterview
-version: 1.7.1
+version: 1.8
 summary: CUPS/PWG/Apple Raster File Viewer
 description: |
   RasterView is a CUPS, PWG, and Apple raster file viewer.  It basically allows
@@ -20,9 +20,11 @@ apps:
         plugs: [home, x11]
 
 parts:
+    fltk:
+        plugin: cmake
+        source: https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20210319-19ae8975.tar.bz2
+
     main:
         plugin: autotools
         source: .
-        after: [desktop-gtk3]
-
-build-packages: [libfltk1.3-dev]
+        after: [desktop-gtk3 fltk]
