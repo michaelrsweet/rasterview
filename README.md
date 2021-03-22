@@ -60,6 +60,7 @@ specific language governing permissions and limitations under the License.
 Changes in v1.8 (Pending)
 -------------------------
 
+- Color picker mode now copies the hex RGB color to the clipboard.
 - Addressed a few warnings from LGTM.
 - Fixed macOS bundle information and now provide fat binaries for Intel and
   Apple Silicon.

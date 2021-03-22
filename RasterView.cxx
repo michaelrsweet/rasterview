@@ -1,7 +1,7 @@
 //
 // CUPS raster file viewer application window code.
 //
-// Copyright 2002-2018 by Michael R Sweet.
+// Copyright © 2002-2021 by Michael R Sweet.
 //
 // Licensed under Apache License v2.0.  See the file "LICENSE" for more
 // information.
@@ -174,16 +174,17 @@ RasterView::color_cb(
   view   = (RasterView *)(display->window());
   header = display->header();
 
+  view->pixel_[sizeof(view->pixel_) - 1] = '\0';
+
   if (!ccolor || !cpixel)
-    strcpy(view->pixel_, "        -/=/0/1/2/3/4 to zoom");
+    strncpy(view->pixel_, "        -/=/0/1/2/3/4 to zoom", sizeof(view->pixel_) - 1);
   else
   {
-    strcpy(view->pixel_, "       ");
+    strncpy(view->pixel_, "       ", sizeof(view->pixel_) - 1);
 
     for (i = 0, ptr = view->pixel_ + 7; i < display->bytes_per_pixel(); i ++)
     {
-      snprintf(ptr, sizeof(view->pixel_) - (ptr - view->pixel_), " %d",
-               *cpixel++);
+      snprintf(ptr, sizeof(view->pixel_) - (size_t)(ptr - view->pixel_), " %d", *cpixel++);
       ptr += strlen(ptr);
     }
 
@@ -192,15 +193,18 @@ RasterView::color_cb(
 
     int banding = (header->cupsBitsPerPixel + 7) / 8;
 
+    char *hexptr = ptr + 1;
+
     for (i = 0; i < display->bytes_per_color(); i ++)
     {
       if ((i % banding) == 0)
         *ptr++ = ' ';
 
-      snprintf(ptr, sizeof(view->pixel_) - (ptr - view->pixel_), "%02X",
-               ccolor[i]);
+      snprintf(ptr, sizeof(view->pixel_) - (ptr - view->pixel_), "%02X", ccolor[i]);
       ptr += 2;
     }
+
+    Fl::copy(hexptr, strlen(hexptr), 1);
 
     if (header->cupsColorSpace == CUPS_CSPACE_CIEXYZ)
     {
