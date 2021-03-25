@@ -61,6 +61,7 @@ Changes in v1.8 (Pending)
 -------------------------
 
 - Color picker mode now copies the hex RGB color to the clipboard.
+- Zoom gestures are now supported on macOS.
 - Addressed a few warnings from LGTM.
 - Fixed macOS bundle information and now provide fat binaries for Intel and
   Apple Silicon.

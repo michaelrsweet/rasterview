@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <math.h>
+#include <FL/names.h>
 
 
 //
@@ -510,6 +511,25 @@ RasterDisplay::handle(int event)	// I - Event to handle
 		break;
           }
 	  return (1);
+
+      case FL_ZOOM_GESTURE :
+          if (Fl::event_dy() < 0)
+          {
+            // Zoom out
+	    if (factor_)
+	      scale(factor_ * 0.875f);
+	    else
+	      scale((float)xsize_ / (float)header_.cupsWidth * 0.875f);
+          }
+          else
+          {
+            // Zoom in
+	    if (factor_)
+	      scale(factor_ * 1.125f);
+	    else
+	      scale((float)xsize_ / (float)header_.cupsWidth * 1.125f);
+          }
+          return (1);
     }
   }
 

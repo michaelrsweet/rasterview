@@ -14,6 +14,8 @@
 #define __OPENTRANSPORTPROVIDERS__	// For macOS...
 #define FL_INTERNAL
 #include "RasterView.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <FL/Fl.H>
 #include <FL/Fl_Color_Chooser.H>
 #include <FL/Fl_Native_File_Chooser.H>
@@ -515,7 +517,17 @@ RasterView::init()
   // Add this window to the list of windows...
 #ifdef __APPLE__
   if (!first_)
+  {
     fl_open_callback(apple_open_cb);
+
+    if (getenv("DARK"))
+    {
+      Fl::background(50, 50, 50);
+      Fl::background2(23, 23, 23);
+      Fl::foreground(223, 223, 223);
+      Fl::set_color(FL_SELECTION_COLOR, 0, 87, 207);
+    }
+  }
 #endif // __APPLE__
 
   loading_ = 0;
