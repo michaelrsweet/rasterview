@@ -330,6 +330,8 @@ RasterDisplay::handle(int event)	// I - Event to handle
     {
       case FL_ENTER :
       case FL_MOVE :
+          update_mouse_xy();
+
           if ((!yscrollbar_.visible() || Fl::event_x() < yscrollbar_.x()) &&
 	      (!xscrollbar_.visible() || Fl::event_y() < xscrollbar_.y()))
             switch (mode_)
@@ -524,10 +526,20 @@ RasterDisplay::handle(int event)	// I - Event to handle
           else
           {
             // Zoom in
+//            update_mouse_xy();
+
 	    if (factor_)
 	      scale(factor_ * 1.125f);
 	    else
 	      scale((float)xsize_ / (float)header_.cupsWidth * 1.125f);
+
+	    int W, H;
+
+	    W = w() - SBWIDTH - Fl::box_dw(box());
+	    H = h() - SBWIDTH - Fl::box_dh(box());
+
+	    position((int)(mouse_x_ * scale()) - W / 2,
+		     (int)(mouse_y_ * scale()) - H / 2);
           }
           return (1);
     }

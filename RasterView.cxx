@@ -520,13 +520,7 @@ RasterView::init()
   {
     fl_open_callback(apple_open_cb);
 
-    if (getenv("DARK"))
-    {
-      Fl::background(50, 50, 50);
-      Fl::background2(23, 23, 23);
-      Fl::foreground(223, 223, 223);
-      Fl::set_color(FL_SELECTION_COLOR, 0, 87, 207);
-    }
+    Fl::dynamic_color(FL_DYNAMIC_COLOR_AUTO);
   }
 #endif // __APPLE__
 
