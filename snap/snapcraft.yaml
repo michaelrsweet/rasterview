@@ -24,7 +24,7 @@ parts:
         plugin: cmake
         configflags: [-DFLTK_BUILD_TEST=OFF,-DOPTION_USE_GL=OFF,-DOPTION_BUILD_HTML_DOCUMENTATION=OFF,-DOPTION_BUILD_PDF_DOCUMENTATION=OFF]
         source: https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20210716-787c67af.tar.bz2
-        build-packages: [libx11-dev, libcairo2-dev, libxext-dev, libxft-dev, libxinerama-dev]
+        build-packages: [libx11-dev, libcairo2-dev, libjpeg-dev libpng-dev libxext-dev, libxft-dev, libxinerama-dev]
 
     main:
         plugin: autotools
