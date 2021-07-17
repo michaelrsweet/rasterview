@@ -517,11 +517,7 @@ RasterView::init()
   // Add this window to the list of windows...
 #ifdef __APPLE__
   if (!first_)
-  {
     fl_open_callback(apple_open_cb);
-
-    Fl::dynamic_color(FL_DYNAMIC_COLOR_AUTO);
-  }
 #endif // __APPLE__
 
   loading_ = 0;
