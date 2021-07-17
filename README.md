@@ -57,8 +57,8 @@ CONDITIONS OF ANY KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations under the License.
 
 
-Changes in v1.8 (Pending)
--------------------------
+Changes in v1.8 (2021-07-17)
+----------------------------
 
 - Fixed HiDPI support on Linux (Issue #11)
 - Fixed macOS 11 (Big Sur) issues (Issue #15)

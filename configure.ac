@@ -95,7 +95,7 @@ AC_ARG_WITH([archflags], AS_HELP_STRING([--with-archflags=...], [Specify archite
     ARCHFLAGS="$withval"
 ], [
     AS_IF([test $uname = Darwin -a $uversion -ge 2000 -a x$enable_debug != xyes], [
-        ARCHFLAGS="-mmacosx-version-min=10.14 -arch x86_64 -arch arm64e"
+        ARCHFLAGS="-mmacosx-version-min=10.14 -arch x86_64 -arch arm64"
     ], [
         ARCHFLAGS=""
     ])

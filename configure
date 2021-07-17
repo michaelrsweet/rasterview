@@ -4384,7 +4384,7 @@ else $as_nop
     if test $uname = Darwin -a $uversion -ge 2000 -a x$enable_debug != xyes
 then :
 
-        ARCHFLAGS="-mmacosx-version-min=10.14 -arch x86_64 -arch arm64e"
+        ARCHFLAGS="-mmacosx-version-min=10.14 -arch x86_64 -arch arm64"
 
 else $as_nop
 
