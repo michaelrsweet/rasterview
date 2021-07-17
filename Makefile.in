@@ -118,6 +118,18 @@ uninstall-desktop:
 
 # Make a disk image with the compiled program on macOS...
 dmg:	all
+	echo Signing RasterView application bundle
+	codesign -f $(CSFLAGS) RasterView.app
+	echo Creating archive for notarization
+	rm -f RasterView.zip
+	ditto -c -k --keepParent RasterView.app RasterView.zip
+	echo Notarizing application
+	xcrun altool --notarize-app -f RasterView.zip \
+		--primary-bundle-id org.msweet.rasterview \
+		--username "$(APPLEID)" \
+		--password "@keychain:AC_$(TEAMID)" \
+		--asc-provider "$(TEAMID)"
+	echo Making disk image
 	rm -f rasterview-$(VERSION).dmg
 	dmgbuild -s dmgbuild.py "RasterView $(VERSION)" ~/Desktop/rasterview-$(VERSION)-macos.dmg
 
