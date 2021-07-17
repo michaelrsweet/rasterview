@@ -60,6 +60,9 @@ specific language governing permissions and limitations under the License.
 Changes in v1.8 (Pending)
 -------------------------
 
+- Fixed HiDPI support on Linux (Issue #11)
+- Fixed macOS 11 (Big Sur) issues (Issue #15)
+- Can now view page bitmaps up to 2GB in size (Issue #16)
 - Color picker mode now copies the hex RGB color to the clipboard.
 - Zoom gestures are now supported on macOS.
 - Addressed a few warnings from LGTM.

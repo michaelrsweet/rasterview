@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <math.h>
+#include <limits.h>
 #include <FL/names.h>
 
 
@@ -694,7 +695,7 @@ RasterDisplay::load_page()
   if (!cupsRasterReadHeader2(ras_, &header_))
   {
     int err;
-    fl_alert("cupsRasterReadHeader() failed: %s", gzerror(fp_, &err));
+    fl_alert("Unable to read page header: %s", gzerror(fp_, &err));
     return (0);
   }
 
@@ -702,7 +703,7 @@ RasterDisplay::load_page()
 
   if (header_.cupsColorOrder == CUPS_ORDER_PLANAR)
   {
-    fl_alert("Sorry, we don't support planar raster data at this time!");
+    fl_alert("Sorry, RasterView doesn't support planar raster data at this time.");
     return (0);
   }
 
@@ -789,21 +790,18 @@ RasterDisplay::load_page()
 
   bpp_ = ((header_.cupsBitsPerColor < 8 || !is_subtractive()) && header_.cupsNumColors == 1) ? 1 : 3;
 
-  if (header_.cupsWidth == 0 || header_.cupsWidth > 1000000 ||
-      header_.cupsHeight == 0 || header_.cupsHeight > 1000000)
+  if (header_.cupsWidth == 0 || header_.cupsWidth > 1000000 || header_.cupsHeight == 0 || header_.cupsHeight > 1000000)
   {
-    fl_alert("Sorry, image dimensions are out of range (%ux%u)!",
-             header_.cupsWidth, header_.cupsHeight);
+    fl_alert("Sorry, image dimensions are out of range (%ux%u).", header_.cupsWidth, header_.cupsHeight);
     return (0);
   }
 
   long	pixelsize = (long)header_.cupsWidth * bpp_;
   long	bytes = pixelsize * header_.cupsHeight;
 
-  if (bytes > (256 * 1024 * 1024))
+  if (bytes >= INT_MAX)
   {
-    fl_alert("Sorry, image dimensions are out of range (%ux%u)!",
-             header_.cupsWidth, header_.cupsHeight);
+    fl_alert("Sorry, image is too large to display (%ux%ux%u >= 2GB).", header_.cupsWidth, header_.cupsHeight, header_.cupsBitsPerPixel);
     return (0);
   }
 
@@ -817,7 +815,7 @@ RasterDisplay::load_page()
 
     if (!pixels_)
     {
-      fl_alert("Unable to allocate %ld bytes for page data!", bytes);
+      fl_alert("Unable to allocate %ld bytes for page data.", bytes);
       return (0);
     }
   }
@@ -841,7 +839,7 @@ RasterDisplay::load_page()
 
     if (!colors_)
     {
-      fl_alert("Unable to allocate %ld bytes for page data!", bytes);
+      fl_alert("Unable to allocate %ld bytes for page data.", bytes);
       return (0);
     }
   }
@@ -856,8 +854,7 @@ RasterDisplay::load_page()
 
   if (!line)
   {
-    fl_alert("Unable to allocate %d bytes for raster data!",
-             header_.cupsBytesPerLine);
+    fl_alert("Unable to allocate %d bytes for raster data.", header_.cupsBytesPerLine);
     return (0);
   }
 
@@ -1094,7 +1091,7 @@ RasterDisplay::open_file(
 
   if ((ras_ = cupsRasterOpenIO((cups_raster_iocb_t)raster_cb, fp_, CUPS_RASTER_READ)) == NULL)
   {
-    fl_alert("cupsRasterOpenIO() failed.");
+    fl_alert("Unable to read raster file header.");
     gzclose(fp_);
     fp_ = NULL;
     return (0);
@@ -1164,17 +1161,6 @@ RasterDisplay::page(int number)		// I - New page
     this->load_page();
   else if (number != page_)
   {
-#if 0
-    if (number < page_)
-    {
-      cupsRasterClose(ras_);
-      gzclose(fp_);
-
-      fp_  = gzopen(filename_, "rb");
-      ras_ = cupsRasterOpenIO((cups_raster_iocb_t)raster_cb, fp_, CUPS_RASTER_READ);
-    }
-#endif // 0
-
     gzseek(fp_, pages_[number - 1], SEEK_SET);
     rasterReset(ras_);
 
