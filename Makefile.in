@@ -101,6 +101,8 @@ install-desktop:
 	cp rasterview-32.png $(BUILDROOT)$(datadir)/icons/hicolor/32x32/apps/rasterview.png
 	$(MKDIR) $(BUILDROOT)$(datadir)/icons/hicolor/128x128/apps
 	cp rasterview-128.png $(BUILDROOT)$(datadir)/icons/hicolor/128x128/apps/rasterview.png
+	$(MKDIR) $(BUILDROOT)$(datadir)/mime/packages
+	cp rasterview.xml $(BUILDROOT)$(datadir)/mime/packages
 
 
 uninstall: @UNINSTALLDESKTOP@
@@ -114,6 +116,7 @@ uninstall-desktop:
 	$(RM) $(datadir)/mimelnk/image/urf.desktop
 	$(RM) $(datadir)/icons/hicolor/32x32/apps/rasterview.png
 	$(RM) $(datadir)/icons/hicolor/128x128/apps/rasterview.png
+	$(RM) $(datadir)/mime/packages/rasterview.xml
 
 
 # Make a disk image with the compiled program on macOS...
