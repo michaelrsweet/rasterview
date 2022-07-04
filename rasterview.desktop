@@ -1,11 +1,10 @@
 [Desktop Entry]
 Name=RasterView
 Comment=CUPS Raster Viewer
-TryExec=rasterview
 Exec=rasterview %F
-Icon=rasterview.png
+Icon=rasterview
 Terminal=false
 Type=Application
-MimeType=application/vnd.cups-raster
-Encoding=UTF-8
-Categories=Graphics;
+# image/x-cmu-raster is the shared-mime-info MIME for application/vnd.cups-raster
+MimeType=image/x-cmu-raster;image/pwg-raster;image/urf;
+Categories=Graphics;RasterGraphics;Viewer;2DGraphics;
