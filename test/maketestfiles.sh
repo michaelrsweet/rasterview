@@ -17,7 +17,6 @@ cspaces=""
 orders=""
 filter=""
 format="ras"
-FINAL_CONTENT_TYPE=application/vnd.cups-raster; export FINAL_CONTENT_TYPE
 if test -d /usr/libexec/cups/filter; then
 	filterpath="/usr/libexec/cups/filter"
 else
@@ -73,17 +72,14 @@ for option in $*; do
 			;;
 
 		apple)
-			FINAL_CONTENT_TYPE="image/urf"
 			format="apple"
 			;;
 
 		pwg)
-			FINAL_CONTENT_TYPE="image/pwg-raster"
 			format="pwg"
 			;;
 
 		ras)
-			FINAL_CONTENT_TYPE="application/vnd.cups-raster"
 			format="ras"
 			;;
 
