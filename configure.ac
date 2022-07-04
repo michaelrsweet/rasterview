@@ -105,7 +105,7 @@ AC_SUBST([ARCHFLAGS])
 dnl See if we have the X11 desktop stuff used by GNOME and KDE...
 AC_MSG_CHECKING([if GNOME/KDE desktop is in use])
 desktopdir=""
-for dir in /usr/share/applications /usr/share/applnk /etc/X11/applnk; do
+for dir in /usr/share/applications; do
     AS_IF([test -d $dir], [
 	desktopdir=$dir
 	break
