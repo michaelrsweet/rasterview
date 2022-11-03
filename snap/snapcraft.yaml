@@ -22,21 +22,19 @@ architectures:
 apps:
     rasterview:
         extensions: [gnome-3-38]
-        command: $SNAP/bin/rasterview
+        command: usr/bin/rasterview
         desktop: usr/share/applications/Development/rasterview.desktop
         plugs: [home, x11]
 
 parts:
     fltk:
         plugin: cmake
-        cmake-parameters: [-DFLTK_BUILD_TEST=OFF,-DOPTION_USE_GL=OFF,-DOPTION_BUILD_HTML_DOCUMENTATION=OFF,-DOPTION_BUILD_PDF_DOCUMENTATION=OFF]
-#        source: https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20210716-787c67af.tar.bz2
+        cmake-parameters: [-DCMAKE_INSTALL_PREFIX=/usr,-DFLTK_BUILD_TEST=OFF,-DOPTION_USE_GL=OFF,-DOPTION_BUILD_HTML_DOCUMENTATION=OFF,-DOPTION_BUILD_PDF_DOCUMENTATION=OFF]
         source: https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20221028-f9acdb6e.tar.bz2
         build-packages: [libx11-dev, libcairo2-dev, libjpeg-dev, libpng-dev, libxext-dev, libxft-dev, libxinerama-dev]
 
     main:
         plugin: autotools
+        autotools-configure-parameters: [--prefix=/usr]
         source: .
-        build-environment:
-        - FLTK_CONFIG: "$SNAPCRAFT_STAGE/bin/fltk-config"
         after: [fltk]
