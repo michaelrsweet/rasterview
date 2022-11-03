@@ -37,4 +37,6 @@ parts:
     main:
         plugin: autotools
         source: .
+        build-environment:
+        - FLTK_CONFIG: "$SNAPCRAFT_STAGE/bin/fltk-config"
         after: [fltk]
