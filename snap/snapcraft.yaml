@@ -1,4 +1,5 @@
 name: rasterview
+base: core20
 version: 1.8
 summary: CUPS/PWG/Apple Raster File Viewer
 description: |
@@ -13,9 +14,15 @@ grade: stable
 confinement: strict
 icon: rasterview-128.png
 
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+  - build-on: armhf
+
 apps:
     rasterview:
-        command: desktop-launch $SNAP/bin/rasterview
+        extensions: [gnome-3-38]
+        command: $SNAP/bin/rasterview
         desktop: usr/share/applications/Development/rasterview.desktop
         plugs: [home, x11]
 
@@ -23,7 +30,8 @@ parts:
     fltk:
         plugin: cmake
         configflags: [-DFLTK_BUILD_TEST=OFF,-DOPTION_USE_GL=OFF,-DOPTION_BUILD_HTML_DOCUMENTATION=OFF,-DOPTION_BUILD_PDF_DOCUMENTATION=OFF]
-        source: https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20210716-787c67af.tar.bz2
+#        source: https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20210716-787c67af.tar.bz2
+        source: https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20221028-f9acdb6e.tar.bz2
         build-packages: [libx11-dev, libcairo2-dev, libjpeg-dev, libpng-dev, libxext-dev, libxft-dev, libxinerama-dev]
 
     main:
