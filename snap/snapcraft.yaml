@@ -1,6 +1,6 @@
 name: rasterview
 base: core20
-version: 1.8
+version: "1.8"
 summary: CUPS/PWG/Apple Raster File Viewer
 description: |
   RasterView is a CUPS, PWG, and Apple raster file viewer.  It basically allows
