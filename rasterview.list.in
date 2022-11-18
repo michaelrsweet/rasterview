@@ -30,14 +30,11 @@ $desktopdir=@desktopdir@
 # Files...
 f 0755 root sys $bindir/rasterview rasterview
 
-d 0755 root sys $desktopdir/Development -
-f 0644 root sys $desktopdir/Development/rasterview.desktop rasterview.desktop
+d 0755 root sys $desktopdir -
+f 0644 root sys $desktopdir/rasterview.desktop rasterview.desktop
 
-d 0755 root sys $datadir/mimelnk/application -
-f 0644 root sys $datadir/mimelnk/application/vnd.cups-raster.desktop vnd.cups-raster.desktop
-
-d 0755 root sys $datadir/mimelnk/image -
-f 0644 root sys $datadir/mimelnk/image/pwg-raster.desktop pwg-raster.desktop
+d 0755 root sys $datadir/mime/packages -
+f 0644 root sys $datadir/mime/packages/rasterview.xml rasterview.xml
 
 d 0755 root sys $datadir/icons/hicolor/32x32/apps -
 f 0644 root sys $datadir/icons/hicolor/32x32/apps/rasterview.png rasterview-32.png

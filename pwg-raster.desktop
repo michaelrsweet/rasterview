@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=MimeType
-MimeType=image/pwg-raster
-Icon=rasterview.png
-Patterns=*.pwg
-Name=PWG Raster File
-Comment=PWG Raster File
-Encoding=UTF-8

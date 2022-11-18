@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="image/pwg-raster">
+    <comment>PWG raster image</comment>
+    <glob pattern="*.pwg"/>
+  </mime-type>
+  <mime-type type="image/urf">
+    <comment>Apple raster image</comment>
+    <glob pattern="*.apple"/>
+    <glob pattern="*.urf"/>
+  </mime-type>
+</mime-info>

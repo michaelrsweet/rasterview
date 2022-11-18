@@ -90,17 +90,14 @@ install: all @INSTALLDESKTOP@
 
 
 install-desktop:
-	$(MKDIR) $(BUILDROOT)$(desktopdir)/Development
-	cp rasterview.desktop $(BUILDROOT)$(desktopdir)/Development
-	$(MKDIR) $(BUILDROOT)$(datadir)/mimelnk/application
-	cp vnd.cups-raster.desktop $(BUILDROOT)$(datadir)/mimelnk/application
-	$(MKDIR) $(BUILDROOT)$(datadir)/mimelnk/image
-	cp pwg-raster.desktop $(BUILDROOT)$(datadir)/mimelnk/image
-	cp urf.desktop $(BUILDROOT)$(datadir)/mimelnk/image
+	$(MKDIR) $(BUILDROOT)$(desktopdir)
+	cp rasterview.desktop $(BUILDROOT)$(desktopdir)
 	$(MKDIR) $(BUILDROOT)$(datadir)/icons/hicolor/32x32/apps
 	cp rasterview-32.png $(BUILDROOT)$(datadir)/icons/hicolor/32x32/apps/rasterview.png
 	$(MKDIR) $(BUILDROOT)$(datadir)/icons/hicolor/128x128/apps
 	cp rasterview-128.png $(BUILDROOT)$(datadir)/icons/hicolor/128x128/apps/rasterview.png
+	$(MKDIR) $(BUILDROOT)$(datadir)/mime/packages
+	cp rasterview.xml $(BUILDROOT)$(datadir)/mime/packages
 
 
 uninstall: @UNINSTALLDESKTOP@
@@ -108,12 +105,10 @@ uninstall: @UNINSTALLDESKTOP@
 
 
 uninstall-desktop:
-	$(RM) $(desktopdir)/Graphics/rasterview.desktop
-	$(RM) $(datadir)/mimelnk/application/vnd.cups-raster.desktop
-	$(RM) $(datadir)/mimelnk/image/pwg-raster.desktop
-	$(RM) $(datadir)/mimelnk/image/urf.desktop
+	$(RM) $(desktopdir)/rasterview.desktop
 	$(RM) $(datadir)/icons/hicolor/32x32/apps/rasterview.png
 	$(RM) $(datadir)/icons/hicolor/128x128/apps/rasterview.png
+	$(RM) $(datadir)/mime/packages/rasterview.xml
 
 
 # Make a disk image with the compiled program on macOS...
