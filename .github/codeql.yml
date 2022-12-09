@@ -1,3 +1,15 @@
 query-filters:
   - exclude:
       id: cpp/resource-not-released-in-destructor
+  - exclude:
+      id: cpp/incorrect-allocation-error-handling
+  - exclude:
+      id: cpp/poorly-documented-function
+  - exclude:
+      id: cpp/include-non-header
+  - exclude:
+      id: cpp/commented-out-code
+  - exclude:
+      id: cpp/long-switch
+  - exclude:
+      id: cpp/complex-block
