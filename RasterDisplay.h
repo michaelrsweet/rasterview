@@ -22,8 +22,12 @@
 #  include <zlib.h>
 
 
-// Maximum pages
-#  define RASTER_MAX_PAGES 1000
+//
+// Constants...
+//
+
+#  define RASTER_MAX_PAGES	1000	// Maximum pages
+#  define SBWIDTH		17	// Scrollbar width
 
 
 //
@@ -87,6 +91,8 @@ class RasterDisplay : public Fl_Group
   static void	scrollbar_cb(Fl_Widget *w, void *d);
   void		update_mouse_xy();
   void		update_scrollbars();
+  int		visible_h() { return (h() - Fl::box_dh(box()) - (yscrollbar_.visible() ? SBWIDTH : 0)); }
+  int		visible_w() { return (w() - Fl::box_dw(box()) - (xscrollbar_.visible() ? SBWIDTH : 0)); }
 
   protected:
 

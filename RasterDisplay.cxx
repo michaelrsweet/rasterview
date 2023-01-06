@@ -38,7 +38,6 @@
 #define D65_X	(0.412453 + 0.357580 + 0.180423)
 #define D65_Y	(0.212671 + 0.715160 + 0.072169)
 #define D65_Z	(0.019334 + 0.119193 + 0.950227)
-#define SBWIDTH	17			// Scrollbar width
 
 
 //
@@ -224,7 +223,9 @@ RasterDisplay::draw()
     draw_box();
 
   if (damage() & FL_DAMAGE_SCROLL)
+  {
     fl_pop_clip();
+  }
   else if (factor_)
   {
     fl_color(FL_GRAY);
@@ -257,13 +258,10 @@ RasterDisplay::draw()
     xmod_  = header_.cupsWidth % xsize_;
 
 #ifdef DEBUG
-    printf("    xoff=%d, yoff=%d, xsize_=%d, ysize_=%d, xstep_=%d, xmod_=%d\n",
-           xoff, yoff, xsize_, ysize_, xstep_, xmod_);
+    printf("    xoff=%d, yoff=%d, xsize_=%d, ysize_=%d, xstep_=%d, xmod_=%d\n", xoff, yoff, xsize_, ysize_, xstep_, xmod_);
 #endif // DEBUG
 
-    fl_draw_image(image_cb, this, xoff, yoff,
-                  xsize_ > W ? W : xsize_,
-		  ysize_ > H ? H : ysize_, bpp_);
+    fl_draw_image(image_cb, this, xoff, yoff, xsize_ > W ? W : xsize_, ysize_ > H ? H : ysize_, bpp_);
 
     fl_pop_clip();
   }
@@ -467,8 +465,8 @@ RasterDisplay::handle(int event)	// I - Event to handle
 		  int W, H;
 
 
-                  W = w() - SBWIDTH - Fl::box_dw(box());
-                  H = h() - SBWIDTH - Fl::box_dh(box());
+                  W = visible_w();
+                  H = visible_h();
 
                   if (abs(start_ex_ - Fl::event_x()) > 4 ||
 		      abs(start_ey_ - Fl::event_y()) > 4)
@@ -536,11 +534,10 @@ RasterDisplay::handle(int event)	// I - Event to handle
 
 	    int W, H;
 
-	    W = w() - SBWIDTH - Fl::box_dw(box());
-	    H = h() - SBWIDTH - Fl::box_dh(box());
+	    W = visible_w();
+	    H = visible_h();
 
-	    position((int)(mouse_x_ * scale()) - W / 2,
-		     (int)(mouse_y_ * scale()) - H / 2);
+	    position((int)(mouse_x_ * scale()) - W / 2, (int)(mouse_y_ * scale()) - H / 2);
           }
           return (1);
     }
@@ -1181,8 +1178,8 @@ RasterDisplay::position(int X,		// I - New X offset
   int	W, H;				// Interior size
 
 
-  W = w() - SBWIDTH;
-  H = h() - SBWIDTH;
+  W = visible_w();
+  H = visible_h();
 
   if (X < 0)
     X = 0;
@@ -1237,6 +1234,8 @@ RasterDisplay::resize(int X,		// I - New X position
 
       xsize_ = ysize_ * header_.cupsWidth / header_.cupsHeight;
     }
+
+    printf("xsize_=%d, W=%d, ysize_=%d, H=%d\n", xsize_, W, ysize_, H);
   }
 
   update_scrollbars();
@@ -1311,8 +1310,8 @@ RasterDisplay::scale(float factor)	// I - Scaling factor (0 = auto)
   if (!header_.cupsWidth || !header_.cupsHeight)
     return;
 
-  W = w() - SBWIDTH - Fl::box_dw(box());
-  H = h() - SBWIDTH - Fl::box_dh(box());
+  W = visible_w();
+  H = visible_h();
 
   if (factor_ == 0.0f)
   {
@@ -1380,24 +1379,32 @@ RasterDisplay::scale(float factor)	// I - Scaling factor (0 = auto)
   else if (X > (xsize_ - W))
     X = xsize_ - W;
 
-  xscrollbar_.value(X, W, 0, xsize_);
-
   if (xsize_ <= W)
+  {
     xscrollbar_.deactivate();
+    xscrollbar_.value(0, 1, 0, 1);
+  }
   else
+  {
     xscrollbar_.activate();
+    xscrollbar_.value(X, W, 0, xsize_);
+  }
 
   if (Y < 0)
     Y = 0;
   else if (Y > (ysize_ - H))
     Y = ysize_ - H;
 
-  yscrollbar_.value(Y, H, 0, ysize_);
-
   if (ysize_ <= H)
+  {
     yscrollbar_.deactivate();
+    yscrollbar_.value(0, 1, 0, 1);
+  }
   else
+  {
     yscrollbar_.activate();
+    yscrollbar_.value(Y, H, 0, ysize_);
+  }
 }
 
 
@@ -1428,58 +1435,49 @@ RasterDisplay::update_mouse_xy()
   int	W, H;				// Width and height
 
 
-  X = Fl::event_x() - x() - Fl::box_dx(box());
-  Y = Fl::event_y() - y() - Fl::box_dy(box());
-  W = w() - SBWIDTH - Fl::box_dw(box());
-  H = h() - SBWIDTH - Fl::box_dh(box());
+  X = Fl::event_x() - x() - Fl::box_dx(box()) + xscrollbar_.value();
+  Y = Fl::event_y() - y() - Fl::box_dy(box()) + yscrollbar_.value();
+  W = visible_w();
+  H = visible_h();
 
   if (!ras_ || xsize_ <= 0 || ysize_ <= 0)
   {
     mouse_x_ = -1;
     mouse_y_ = -1;
+    return;
   }
 
   if (xsize_ < W)
-  {
     X -= (W - xsize_) / 2;
 
-    if (X < 0)
-      mouse_x_ = 0;
-    else if (X >= xsize_)
-      mouse_x_ = header_.cupsWidth;
-    else
-      mouse_x_ = X * header_.cupsWidth / xsize_;
-  }
+  if (X < 0)
+    mouse_x_ = 0;
+  else if (X >= xsize_)
+    mouse_x_ = header_.cupsWidth;
   else
-    mouse_x_ = (xscrollbar_.value() + X) * header_.cupsWidth / xsize_;
+    mouse_x_ = X * header_.cupsWidth / xsize_;
 
   if (ysize_ < H)
-  {
     Y -= (H - ysize_) / 2;
 
-    if (Y < 0)
-      mouse_y_ = 0;
-    else if (Y >= ysize_)
-      mouse_y_ = header_.cupsHeight;
-    else
-      mouse_y_ = Y * header_.cupsHeight / ysize_;
-  }
+  if (Y < 0)
+    mouse_y_ = 0;
+  else if (Y >= ysize_)
+    mouse_y_ = header_.cupsHeight;
   else
-    mouse_y_ = (yscrollbar_.value() + Y) * header_.cupsHeight / ysize_;
+    mouse_y_ = Y * header_.cupsHeight / ysize_;
+
+  printf("X:%4d  XSC:%4d  Y:%4d  W:%4d  H:%4d  XSZ:%4d  YSZ:%4d  MX:%4d  MY:%4d\n", X, xscrollbar_.value(), Y, W, H, xsize_, ysize_, mouse_x_, mouse_y_);
 
   if (mouse_x_ < 0)
     mouse_x_ = 0;
   else if (mouse_x_ > (int)header_.cupsWidth)
-    mouse_x_ = header_.cupsWidth;
+    mouse_x_ = (int)header_.cupsWidth;
 
   if (mouse_y_ < 0)
     mouse_y_ = 0;
   else if (mouse_y_ > (int)header_.cupsHeight)
-    mouse_y_ = header_.cupsHeight;
-
-//  printf("xscrollbar_=%d, yscrollbar_=%d\n", xscrollbar_.value(),
-//         yscrollbar_.value());
-//  printf("mouse_x_=%d, mouse_y_=%d\n", mouse_x_, mouse_y_);
+    mouse_y_ = (int)header_.cupsHeight;
 }
 
 
@@ -1496,8 +1494,8 @@ RasterDisplay::update_scrollbars()
 
   if (header_.cupsWidth && header_.cupsHeight)
   {
-    W = w() - SBWIDTH - Fl::box_dw(box());
-    H = h() - SBWIDTH - Fl::box_dh(box());
+    W = visible_w();
+    H = visible_h();
 
     X = xscrollbar_.value();
     if (X > (xsize_ - W))
@@ -1505,12 +1503,16 @@ RasterDisplay::update_scrollbars()
     else if (X < 0)
       X = 0;
 
-    xscrollbar_.value(X, W, 0, xsize_);
-
     if (xsize_ <= W)
+    {
       xscrollbar_.deactivate();
+      xscrollbar_.value(0, 1, 0, 1);
+    }
     else
+    {
       xscrollbar_.activate();
+      xscrollbar_.value(X, W, 0, xsize_);
+    }
 
     Y = yscrollbar_.value();
     if (Y > (ysize_ - H))
@@ -1518,12 +1520,16 @@ RasterDisplay::update_scrollbars()
     else if (Y < 0)
       Y = 0;
 
-    yscrollbar_.value(Y, H, 0, ysize_);
-
     if (ysize_ <= H)
+    {
       yscrollbar_.deactivate();
+      yscrollbar_.value(0, 1, 0, 1);
+    }
     else
+    {
       yscrollbar_.activate();
+      yscrollbar_.value(Y, H, 0, ysize_);
+    }
   }
   else
   {
