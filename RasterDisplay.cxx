@@ -197,22 +197,8 @@ RasterDisplay::draw()
 
   X = x() + Fl::box_dx(box());
   Y = y() + Fl::box_dy(box());
-  W = w() - Fl::box_dw(box());
-  H = h() - Fl::box_dh(box());
-
-  if (factor_)
-  {
-    xscrollbar_.show();
-    yscrollbar_.show();
-
-    W -= SBWIDTH;
-    H -= SBWIDTH;
-  }
-  else
-  {
-    xscrollbar_.hide();
-    yscrollbar_.hide();
-  }
+  W = visible_w();
+  H = visible_h();
 
   if (damage() & FL_DAMAGE_SCROLL)
     fl_push_clip(X, Y, W, H);
@@ -1234,8 +1220,6 @@ RasterDisplay::resize(int X,		// I - New X position
 
       xsize_ = ysize_ * header_.cupsWidth / header_.cupsHeight;
     }
-
-    printf("xsize_=%d, W=%d, ysize_=%d, H=%d\n", xsize_, W, ysize_, H);
   }
 
   update_scrollbars();
@@ -1284,6 +1268,17 @@ RasterDisplay::scale(float factor)	// I - Scaling factor (0 = auto)
   int	X, Y, W, H;			// Interior of widget
   float	ratio;				// Scaling ratio
 
+
+  if (factor)
+  {
+    xscrollbar_.show();
+    yscrollbar_.show();
+  }
+  else
+  {
+    xscrollbar_.hide();
+    yscrollbar_.hide();
+  }
 
   if (factor > 20.0f)
     factor = 20.0f;
@@ -1467,7 +1462,7 @@ RasterDisplay::update_mouse_xy()
   else
     mouse_y_ = Y * header_.cupsHeight / ysize_;
 
-  printf("X:%4d  XSC:%4d  Y:%4d  W:%4d  H:%4d  XSZ:%4d  YSZ:%4d  MX:%4d  MY:%4d\n", X, xscrollbar_.value(), Y, W, H, xsize_, ysize_, mouse_x_, mouse_y_);
+//  printf("EXY:%4d,%4d  BXY:%4d,%4d  SC=%4d,%4d  XY:%4d,%4d  WH:%4d,%4d  SZ:%4d,%4d  MXY:%4d,%4d\n", Fl::event_x(), Fl::event_y(), Fl::box_dx(box()), Fl::box_dy(box()), xscrollbar_.value(), yscrollbar_.value(), X, Y, W, H, xsize_, ysize_, mouse_x_, mouse_y_);
 
   if (mouse_x_ < 0)
     mouse_x_ = 0;
