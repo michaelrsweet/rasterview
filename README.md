@@ -3,8 +3,6 @@ RasterView - PWG/Apple Raster Viewer
 
 ![Version](https://img.shields.io/github/v/release/michaelrsweet/rasterview?include_prereleases)
 ![Apache 2.0](https://img.shields.io/github/license/michaelrsweet/rasterview)
-[![LGTM Grade](https://img.shields.io/lgtm/grade/cpp/github/michaelrsweet/rasterview)](https://lgtm.com/projects/g/michaelrsweet/rasterview/context:cpp)
-[![LGTM Alerts](https://img.shields.io/lgtm/alerts/github/michaelrsweet/rasterview)](https://lgtm.com/projects/g/michaelrsweet/rasterview/)
 
 RasterView is a CUPS, PWG, and Apple raster file viewing application. It
 basically allows you to look at the raster data produced by any of the standard
@@ -50,7 +48,7 @@ standard RIP filters.  Run the following command for help:
 Legal Stuff
 -----------
 
-RasterView is Copyright © 2002-2021 by Michael R Sweet.
+RasterView is Copyright © 2002-2023 by Michael R Sweet.
 
 RasterView is provided under the terms of the Apache License, Version 2.0.  A
 copy of this license can be found in the file `LICENSE`.  Additional legal
@@ -60,6 +58,13 @@ Unless required by applicable law or agreed to in writing, software distributed
 under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 CONDITIONS OF ANY KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations under the License.
+
+
+Changes in v1.9 (YYYY-MM-DD)
+----------------------------
+
+- Fixed macOS 'Close' and 'Re-Open' menu items (Issue #20)
+- Updated the maximum zoom to 20x
 
 
 Changes in v1.8 (2021-07-17)

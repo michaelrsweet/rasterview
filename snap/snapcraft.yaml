@@ -1,6 +1,6 @@
 name: rasterview
 base: core20
-version: "1.8"
+version: "1.9"
 summary: CUPS/PWG/Apple Raster File Viewer
 description: |
   RasterView is a CUPS, PWG, and Apple raster file viewer.  It basically allows
@@ -30,7 +30,7 @@ parts:
     fltk:
         plugin: cmake
         cmake-parameters: [-DCMAKE_INSTALL_PREFIX=/usr,-DFLTK_BUILD_TEST=OFF,-DOPTION_USE_GL=OFF,-DOPTION_BUILD_HTML_DOCUMENTATION=OFF,-DOPTION_BUILD_PDF_DOCUMENTATION=OFF]
-        source: https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20221028-f9acdb6e.tar.bz2
+        source: https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20221230-7e4306af.tar.bz2
         build-packages: [libx11-dev, libcairo2-dev, libjpeg-dev, libpng-dev, libxext-dev, libxft-dev, libxinerama-dev]
 
     main:

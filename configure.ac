@@ -1,7 +1,7 @@
 #
 # Configure script for rasterview, a CUPS/PWG Raster viewing program.
 #
-# Copyright © 2002-2021 by Michael R Sweet
+# Copyright © 2002-2023 by Michael R Sweet
 #
 # Licensed under Apache License v2.0.  See the file "LICENSE" for more
 # information.
@@ -10,7 +10,7 @@
 dnl We need at least autoconf 2.50...
 AC_PREREQ(2.60)
 
-AC_INIT([RasterView], [1.8], [https://github.com/michaelrsweet/rasterview/issues], [rasterview], [https://www.msweet.org/rasterview])
+AC_INIT([RasterView], [1.9], [https://github.com/michaelrsweet/rasterview/issues], [rasterview], [https://www.msweet.org/rasterview])
 
 dnl Version number...
 VERSION="AC_PACKAGE_VERSION"

@@ -1,7 +1,7 @@
 //
 // CUPS/PWG Raster display widget methods.
 //
-// Copyright © 2002-2021 by Michael R Sweet.
+// Copyright © 2002-2023 by Michael R Sweet.
 //
 // Licensed under Apache License v2.0.  See the file "LICENSE" for more
 // information.
@@ -1286,8 +1286,8 @@ RasterDisplay::scale(float factor)	// I - Scaling factor (0 = auto)
   float	ratio;				// Scaling ratio
 
 
-  if (factor > 10.0f)
-    factor = 10.0f;
+  if (factor > 20.0f)
+    factor = 20.0f;
 
   // Make sure that the image doesn't get scaled to nothin'...
   if (header_.cupsWidth && header_.cupsHeight)

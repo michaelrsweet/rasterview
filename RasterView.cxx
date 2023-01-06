@@ -1,7 +1,7 @@
 //
 // CUPS raster file viewer application window code.
 //
-// Copyright © 2002-2021 by Michael R Sweet.
+// Copyright © 2002-2023 by Michael R Sweet.
 //
 // Licensed under Apache License v2.0.  See the file "LICENSE" for more
 // information.
@@ -141,10 +141,15 @@ RasterView::close_cb(Fl_Widget  *widget)// I - Menu or window
   RasterView	*view;			// I - Window
 
 
+#ifdef __APPLE__
+  view = (RasterView *)Fl::first_window();
+
+#else
   if (widget->window())
     view = (RasterView *)(widget->window());
   else
     view = (RasterView *)widget;
+#endif // __APPLE__
 
   if (view->loading_)
     return;
@@ -1116,10 +1121,15 @@ RasterView::reopen_cb(Fl_Widget *widget)// I - Menu or window
   RasterView	*view;			// I - Window
 
 
+#ifdef __APPLE__
+  view = (RasterView *)Fl::first_window();
+
+#else
   if (widget->window())
     view = (RasterView *)(widget->window());
   else
     view = (RasterView *)widget;
+#endif // __APPLE__
 
   if (view->loading_)
     return;
