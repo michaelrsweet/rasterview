@@ -54,20 +54,21 @@ SHELL		=	/bin/sh
 RVOBJS		=	\
 			RasterDisplay.o \
 			RasterView.o \
-			error.o \
-			raster.o \
+			raster-error.o \
+			raster-stream.o \
 			main.o
 OBJS		=	\
 			$(RVOBJS) \
-			testcie.o
+			testcie.o \
+			testraster.o
 
 
 # Standard install targets...
-all:	rasterview testcie
+all:	rasterview testcie testraster
 
 
 clean:
-	$(RM) rasterview testcie
+	$(RM) rasterview testcie testraster
 	$(RM) $(OBJS)
 	$(RM) *.bck
 	$(RM) *~
@@ -141,7 +142,7 @@ rasterview:	$(RVOBJS) Makefile
 	$(CXX) $(LDFLAGS) -o $@ $(RVOBJS) $(LIBS)
 	if test x`uname` = xDarwin; then \
 	    test -d RasterView.app/Contents/MacOS || mkdir RasterView.app/Contents/MacOS; \
-	    $(CP) rasterview RasterView.app/Contents/MacOS/rasterview; \
+	    $(CP) rasterview RasterView.app/Contents/MacOS/RasterView; \
 	    $(CODE_SIGN) $(CSFLAGS) RasterView.app; \
 	fi
 
@@ -151,6 +152,11 @@ $(RVOBJS):	RasterView.h RasterDisplay.h
 # Build the CIE test program...
 testcie:	testcie.o Makefile
 	$(CC) $(LDFLAGS) -o $@ testcie.o -lm
+
+
+# Build the raster test program...
+testraster:	testraster.o raster-error.o raster-stream.o Makefile
+	$(CC) $(LDFLAGS) -o $@ testraster.o raster-error.o raster-stream.o -lm
 
 
 # Dependencies...

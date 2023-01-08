@@ -53,34 +53,36 @@ static Fl_Preferences	*prefs = NULL;
 // Local functions...
 //
 
-static void	convert_cmy(cups_page_header2_t *header, uchar *line,
+static void	convert_cmy(cups_page_header_t *header, uchar *line,
 		            uchar *colors, uchar *pixels);
-static void	convert_cmyk(cups_page_header2_t *header, uchar *line,
+static void	convert_cmyk(cups_page_header_t *header, uchar *line,
 		             uchar *colors, uchar *pixels);
-static void	convert_device(cups_page_header2_t *header, uchar *line, uchar *colors, uchar *pixels, uchar device_colors[][3]);
-static void	convert_k(cups_page_header2_t *header, uchar *line,
+static void	convert_device(cups_page_header_t *header, uchar *line, uchar *colors, uchar *pixels, uchar device_colors[][3]);
+static void	convert_k(cups_page_header_t *header, uchar *line,
 		          uchar *colors, uchar *pixels);
-static void	convert_kcmy(cups_page_header2_t *header, uchar *line,
+static void	convert_kcmy(cups_page_header_t *header, uchar *line,
 		             uchar *colors, uchar *pixels);
-static void	convert_kcmycm(cups_page_header2_t *header, uchar *line,
+static void	convert_kcmycm(cups_page_header_t *header, uchar *line,
 		               uchar *colors, uchar *pixels);
-static void	convert_lab(cups_page_header2_t *header, uchar *line,
+static void	convert_lab(cups_page_header_t *header, uchar *line,
 		            uchar *colors, uchar *pixels);
-static void	convert_rgb(cups_page_header2_t *header, uchar *line,
+static void	convert_rgb(cups_page_header_t *header, uchar *line,
 		            uchar *colors, uchar *pixels);
-static void	convert_rgba(cups_page_header2_t *header, int y, uchar *line,
+static void	convert_rgba(cups_page_header_t *header, int y, uchar *line,
 		             uchar *colors, uchar *pixels);
-static void	convert_rgbw(cups_page_header2_t *header, uchar *line,
+static void	convert_rgbw(cups_page_header_t *header, uchar *line,
 		             uchar *colors, uchar *pixels);
-static void	convert_w(cups_page_header2_t *header, uchar *line,
+static void	convert_w(cups_page_header_t *header, uchar *line,
 		          uchar *colors, uchar *pixels);
-static void	convert_xyz(cups_page_header2_t *header, uchar *line,
+static void	convert_xyz(cups_page_header_t *header, uchar *line,
 		            uchar *colors, uchar *pixels);
-static void	convert_ymc(cups_page_header2_t *header, uchar *line,
+static void	convert_ymc(cups_page_header_t *header, uchar *line,
 		            uchar *colors, uchar *pixels);
-static void	convert_ymck(cups_page_header2_t *header, uchar *line,
+static void	convert_ymck(cups_page_header_t *header, uchar *line,
 		             uchar *colors, uchar *pixels);
 static ssize_t	raster_cb(gzFile ctx, unsigned char *buffer, size_t length);
+static size_t	rasterOffset(cups_raster_t *r);
+static void	rasterReset(cups_raster_t *r);
 
 
 //
@@ -553,29 +555,22 @@ RasterDisplay::image_cb(void  *p,	// I - Raster display widget
 			xsize;		// ...
 
 
+//  printf("image_cb(p=%p, X=%d, Y=%d, W=%d, D=%p)\n", p, X, Y, W, D);
+
   display = (RasterDisplay *)p;
   bpp     = display->bpp_;
   xstep   = display->xstep_ * bpp;
   xmod    = display->xmod_;
   xsize   = display->xsize_;
   xerr    = (X * xmod) % xsize;
-
-  if (xsize > (display->w() - Fl::box_dw(display->box()) - SBWIDTH))
-    X = (X + display->xscrollbar_.value()) *
-        (display->header_.cupsWidth - 1) / (xsize - 1);
-  else
-    X = X * (display->header_.cupsWidth - 1) / (xsize - 1);
-
-  if (display->ysize_ > (display->h() - Fl::box_dh(display->box()) - SBWIDTH))
-    Y = (Y + display->yscrollbar_.value()) *
-        (display->header_.cupsHeight - 1) / (display->ysize_ - 1);
-  else
-    Y = Y * (display->header_.cupsHeight - 1) / (display->ysize_ - 1);
-
-  inptr = display->pixels_ + (Y * display->header_.cupsWidth + X) * bpp;
+  X       = (X + display->xscrollbar_.value()) * display->header_.cupsWidth / xsize;
+  Y       = (Y + display->yscrollbar_.value()) * display->header_.cupsHeight / display->ysize_;
+  inptr   = display->pixels_ + (Y * display->header_.cupsWidth + X) * bpp;
 
   if (xstep == bpp && xmod == 0)
+  {
     memcpy(D, inptr, (size_t)W * bpp);
+  }
   else if (bpp == 1)
   {
     for (; W > 0; W --)
@@ -675,7 +670,7 @@ RasterDisplay::load_page()
   if (!ras_ || page_ >= num_pages_)
     return (0);
 
-  if (!cupsRasterReadHeader2(ras_, &header_))
+  if (!cupsRasterReadHeader(ras_, &header_))
   {
     int err;
     fl_alert("Unable to read page header: %s", gzerror(fp_, &err));
@@ -693,7 +688,7 @@ RasterDisplay::load_page()
   // Allocate memory for the page data...
 #ifdef DEBUG
   fprintf(stderr, "DEBUG: sizeof(cups_page_header_t) = %d\n", (int)sizeof(cups_page_header_t));
-  fprintf(stderr, "DEBUG: sizeof(cups_page_header2_t) = %d\n", (int)sizeof(cups_page_header2_t));
+  fprintf(stderr, "DEBUG: sizeof(cups_page_header_t) = %d\n", (int)sizeof(cups_page_header_t));
   fprintf(stderr, "DEBUG: MediaClass = \"%s\"\n", header_.MediaClass);
   fprintf(stderr, "DEBUG: MediaColor = \"%s\"\n", header_.MediaColor);
   fprintf(stderr, "DEBUG: MediaType = \"%s\"\n", header_.MediaType);
@@ -1058,7 +1053,7 @@ int					// O - 1 on success, 0 on failure
 RasterDisplay::open_file(
     const char *filename)		// I - File to open
 {
-  cups_page_header2_t	header;		// Page header
+  cups_page_header_t	header;		// Page header
   uchar			*buffer = NULL;	// Line buffer
   unsigned		bufsize = 0;	// Size of line buffer
   unsigned		y;		// Current line
@@ -1072,7 +1067,7 @@ RasterDisplay::open_file(
     return (0);
   }
 
-  if ((ras_ = cupsRasterOpenIO((cups_raster_iocb_t)raster_cb, fp_, CUPS_RASTER_READ)) == NULL)
+  if ((ras_ = cupsRasterOpenIO((cups_raster_cb_t)raster_cb, fp_, CUPS_RASTER_READ)) == NULL)
   {
     fl_alert("Unable to read raster file header.");
     gzclose(fp_);
@@ -1086,7 +1081,7 @@ RasterDisplay::open_file(
   num_pages_ = 0;
   pages_[0]  = gztell(fp_);
 
-  while (cupsRasterReadHeader2(ras_, &header))
+  while (cupsRasterReadHeader(ras_, &header))
   {
     num_pages_ ++;
 
@@ -1540,7 +1535,7 @@ RasterDisplay::update_scrollbars()
 
 static void
 convert_cmy(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels)	// O - RGB pixels
@@ -1842,7 +1837,7 @@ convert_cmy(
 
 static void
 convert_cmyk(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels)	// O - RGB pixels
@@ -2358,7 +2353,7 @@ convert_cmyk(
 
 static void
 convert_device(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels,	// O - RGB pixels
@@ -2466,7 +2461,7 @@ convert_device(
 
 static void
 convert_k(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels)	// O - Grayscale pixels
@@ -2581,7 +2576,7 @@ convert_k(
 
 static void
 convert_kcmy(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels)	// O - RGB pixels
@@ -3072,7 +3067,7 @@ convert_kcmy(
 
 static void
 convert_kcmycm(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels)	// O - RGB pixels
@@ -3238,7 +3233,7 @@ convert_kcmycm(
 
 static void
 convert_lab(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels)	// O - RGB pixels
@@ -3332,7 +3327,7 @@ convert_lab(
 
 static void
 convert_rgb(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels)	// O - RGB pixels
@@ -3603,7 +3598,7 @@ convert_rgb(
 
 static void
 convert_rgba(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     int                 y,		// I - Raster Y position
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
@@ -4135,7 +4130,7 @@ convert_rgba(
 
 static void
 convert_rgbw(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels)	// O - RGB pixels
@@ -4664,7 +4659,7 @@ convert_rgbw(
 
 static void
 convert_w(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels)	// O - Grayscale pixels
@@ -4777,7 +4772,7 @@ convert_w(
 
 static void
 convert_xyz(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels)	// O - RGB pixels
@@ -4860,7 +4855,7 @@ convert_xyz(
 
 static void
 convert_ymc(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels)	// O - RGB pixels
@@ -5163,7 +5158,7 @@ convert_ymc(
 
 static void
 convert_ymck(
-    cups_page_header2_t *header,	// I - Raster header */
+    cups_page_header_t *header,	// I - Raster header */
     uchar               *line,		// I - Raster line
     uchar               *colors,	// O - Original pixels
     uchar               *pixels)	// O - RGB pixels
@@ -5687,4 +5682,27 @@ raster_cb(gzFile        ctx,		/* I - File pointer */
           size_t        length)		/* I - Bytes to read */
 {
   return ((ssize_t)gzread(ctx, buffer, (unsigned)length));
+}
+
+
+//
+// 'rasterOffset()' - Return the offset in the read buffer.
+//
+
+size_t					// O - Buffered bytes
+rasterOffset(cups_raster_t *r)		// I - Stream
+{
+  return (r->compressed ? r->bufend - r->bufptr : 0);
+}
+
+
+//
+// 'rasterReset()' - Reset the read buffer after a seek.
+//
+
+void
+rasterReset(cups_raster_t *r)		// I - Stream to reset
+{
+  r->bufptr = r->buffer;
+  r->bufend = r->buffer;
 }

@@ -15,7 +15,7 @@
 // Include necessary headers...
 //
 
-#  include "raster.h"
+#  include "raster-private.h"
 #  include <FL/Fl.H>
 #  include <FL/Fl_Group.H>
 #  include <FL/Fl_Scrollbar.H>
@@ -56,7 +56,7 @@ class RasterDisplay : public Fl_Group
 			num_pages_;	// Number of pages
   z_off_t		pages_[RASTER_MAX_PAGES];
 					// Page offsets
-  cups_page_header2_t	header_;	// Page header for current page
+  cups_page_header_t	header_;	// Page header for current page
   int			bpc_,		// Bytes per color
 			bpp_;		// Bytes per pixel
   uchar			*pixels_;	// Pixel buffer
@@ -111,7 +111,7 @@ class RasterDisplay : public Fl_Group
   uchar			*get_color(int X, int Y);
   uchar			*get_pixel(int X, int Y);
   int			handle(int event);
-  cups_page_header2_t	*header() { return &header_; }
+  cups_page_header_t	*header() { return &header_; }
   int			is_subtractive();
   int			load_page();
   void			mode(int m) { mode_ = m; }

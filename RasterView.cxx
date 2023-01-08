@@ -173,7 +173,7 @@ RasterView::color_cb(
   uchar			*cpixel,	// Current pixel value
 			*ccolor;	// Current pixel color
   char			*ptr;		// Pointer into label
-  cups_page_header2_t	*header;	// Page header
+  cups_page_header_t	*header;	// Page header
 
 
   ccolor = display->get_color(display->mouse_x(), display->mouse_y());
@@ -542,73 +542,7 @@ RasterView::load_attrs()
 {
   int			i;		// Looping var
   char			s[1024];	// Line buffer
-  cups_page_header2_t	*header;	// Header data
-  static const char * const cspaces[] =	// Colorspace strings
-  {
-    "CUPS_CSPACE_W",
-    "CUPS_CSPACE_RGB",
-    "CUPS_CSPACE_RGBA",
-    "CUPS_CSPACE_K",
-    "CUPS_CSPACE_CMY",
-    "CUPS_CSPACE_YMC",
-    "CUPS_CSPACE_CMYK",
-    "CUPS_CSPACE_YMCK",
-    "CUPS_CSPACE_KCMY",
-    "CUPS_CSPACE_KCMYcm",
-    "CUPS_CSPACE_GMCK",
-    "CUPS_CSPACE_GMCS",
-    "CUPS_CSPACE_WHITE",
-    "CUPS_CSPACE_GOLD",
-    "CUPS_CSPACE_SILVER",
-    "CUPS_CSPACE_CIEXYZ",
-    "CUPS_CSPACE_CIELab",
-    "CUPS_CSPACE_RGBW",
-    "CUPS_CSPACE_SW",
-    "CUPS_CSPACE_SRGB",
-    "CUPS_CSPACE_ADOBERGB",
-    "UNKNOWN21",
-    "UNKNOWN22",
-    "UNKNOWN23",
-    "UNKNOWN24",
-    "UNKNOWN25",
-    "UNKNOWN26",
-    "UNKNOWN27",
-    "UNKNOWN28",
-    "UNKNOWN29",
-    "UNKNOWN30",
-    "UNKNOWN31",
-    "CUPS_CSPACE_ICC1",
-    "CUPS_CSPACE_ICC2",
-    "CUPS_CSPACE_ICC3",
-    "CUPS_CSPACE_ICC4",
-    "CUPS_CSPACE_ICC5",
-    "CUPS_CSPACE_ICC6",
-    "CUPS_CSPACE_ICC7",
-    "CUPS_CSPACE_ICC8",
-    "CUPS_CSPACE_ICC9",
-    "CUPS_CSPACE_ICCA",
-    "CUPS_CSPACE_ICCB",
-    "CUPS_CSPACE_ICCC",
-    "CUPS_CSPACE_ICCD",
-    "CUPS_CSPACE_ICCE",
-    "CUPS_CSPACE_ICCF",
-    "UNKNOWN47",
-    "CUPS_CSPACE_DEVICE1",
-    "CUPS_CSPACE_DEVICE2",
-    "CUPS_CSPACE_DEVICE3",
-    "CUPS_CSPACE_DEVICE4",
-    "CUPS_CSPACE_DEVICE5",
-    "CUPS_CSPACE_DEVICE6",
-    "CUPS_CSPACE_DEVICE7",
-    "CUPS_CSPACE_DEVICE8",
-    "CUPS_CSPACE_DEVICE9",
-    "CUPS_CSPACE_DEVICEA",
-    "CUPS_CSPACE_DEVICEB",
-    "CUPS_CSPACE_DEVICEC",
-    "CUPS_CSPACE_DEVICED",
-    "CUPS_CSPACE_DEVICEE",
-    "CUPS_CSPACE_DEVICEF"
-  };
+  cups_page_header_t	*header;	// Header data
 
 
   header = display_->header();
@@ -632,8 +566,7 @@ RasterView::load_attrs()
     snprintf(s, sizeof(s), "Duplex = %d\n", header->Duplex);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "HWResolution = [ %d %d ]\n",
-	     header->HWResolution[0], header->HWResolution[1]);
+    snprintf(s, sizeof(s), "HWResolution = [ %d %d ]\n", header->HWResolution[0], header->HWResolution[1]);
     header_buffer_->append(s);
 
     snprintf(s, sizeof(s), "InsertSheet = %d\n", header->InsertSheet);
@@ -657,8 +590,7 @@ RasterView::load_attrs()
     snprintf(s, sizeof(s), "Orientation = %d\n", header->Orientation);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "PageSize = [ %d %d ]\n", header->PageSize[0],
-	     header->PageSize[1]);
+    snprintf(s, sizeof(s), "PageSize = [ %d %d ]\n", header->PageSize[0], header->PageSize[1]);
     header_buffer_->append(s);
 
     snprintf(s, sizeof(s), "Tumble = %d\n", header->Tumble);
@@ -679,52 +611,46 @@ RasterView::load_attrs()
     snprintf(s, sizeof(s), "BytesPerLine = %d\n", header->cupsBytesPerLine);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "ColorOrder = %s\n",
-	     header->cupsColorOrder == CUPS_ORDER_CHUNKED ? "CUPS_ORDER_CHUNKED" :
-		 header->cupsColorOrder == CUPS_ORDER_BANDED ? "CUPS_ORDER_BANDED" :
-		 header->cupsColorOrder == CUPS_ORDER_PLANAR ? "CUPS_ORDER_PLANAR" :
-		 "UNKNOWN");
+    snprintf(s, sizeof(s), "ColorOrder = %s\n", header->cupsColorOrder == CUPS_ORDER_CHUNKED ? "CHUNKED" : header->cupsColorOrder == CUPS_ORDER_BANDED ? "BANDED" : header->cupsColorOrder == CUPS_ORDER_PLANAR ? "PLANAR" : "UNKNOWN");
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "ColorSpace = %s\n",
-	     header->cupsColorSpace < (int)(sizeof(cspaces) / sizeof(cspaces[0])) ?
-		 cspaces[header->cupsColorSpace] : "UNKNOWN");
+    snprintf(s, sizeof(s), "ColorSpace = %s\n", _cupsRasterColorSpaceString(header->cupsColorSpace));
     header_buffer_->append(s);
 
     snprintf(s, sizeof(s), "NumColors = %d\n", header->cupsNumColors);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "TotalPageCount = %u\n", header->cupsInteger[0]);
+    snprintf(s, sizeof(s), "TotalPageCount = %u\n", header->cupsInteger[CUPS_RASTER_PWG_TotalPageCount]);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "CrossFeedTransform = %d\n", header->cupsInteger[1]);
+    snprintf(s, sizeof(s), "CrossFeedTransform = %d\n", header->cupsInteger[CUPS_RASTER_PWG_CrossFeedTransform]);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "FeedTransform = %d\n", header->cupsInteger[2]);
+    snprintf(s, sizeof(s), "FeedTransform = %d\n", header->cupsInteger[CUPS_RASTER_PWG_FeedTransform]);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "ImageBoxLeft = %u\n", header->cupsInteger[3]);
+    snprintf(s, sizeof(s), "ImageBoxLeft = %u\n", header->cupsInteger[CUPS_RASTER_PWG_ImageBoxLeft]);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "ImageBoxTop = %u\n", header->cupsInteger[4]);
+    snprintf(s, sizeof(s), "ImageBoxTop = %u\n", header->cupsInteger[CUPS_RASTER_PWG_ImageBoxTop]);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "ImageBoxRight = %u\n", header->cupsInteger[5]);
+    snprintf(s, sizeof(s), "ImageBoxRight = %u\n", header->cupsInteger[CUPS_RASTER_PWG_ImageBoxRight]);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "ImageBoxBottom = %u\n", header->cupsInteger[6]);
+    snprintf(s, sizeof(s), "ImageBoxBottom = %u\n", header->cupsInteger[CUPS_RASTER_PWG_ImageBoxBottom]);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "AlternatePrimary = %06x (%u, %u, %u)\n", header->cupsInteger[7], (header->cupsInteger[7] >> 16) & 255, (header->cupsInteger[7] >> 8) & 255, header->cupsInteger[7] & 255);
+    snprintf(s, sizeof(s), "AlternatePrimary = %06x (%u, %u, %u)\n", header->cupsInteger[CUPS_RASTER_PWG_AlternatePrimary], (header->cupsInteger[CUPS_RASTER_PWG_AlternatePrimary] >> 16) & 255, (header->cupsInteger[CUPS_RASTER_PWG_AlternatePrimary] >> 8) & 255, header->cupsInteger[CUPS_RASTER_PWG_AlternatePrimary] & 255);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "PrintQuality = %u\n", header->cupsInteger[8]);
+    snprintf(s, sizeof(s), "PrintQuality = %u\n", header->cupsInteger[CUPS_RASTER_PWG_PrintQuality]);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "VendorIdentifier = %u\n", header->cupsInteger[14]);
+    snprintf(s, sizeof(s), "VendorIdentifier = %u\n", header->cupsInteger[CUPS_RASTER_PWG_VendorIdentifier]);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "VendorLength = %u\n", header->cupsInteger[15]);
+    snprintf(s, sizeof(s), "VendorLength = %u\n", header->cupsInteger[CUPS_RASTER_PWG_VendorLength]);
     header_buffer_->append(s);
 
     unsigned char	*data = (unsigned char *)header->cupsReal;
@@ -743,12 +669,10 @@ RasterView::load_attrs()
 
     header_buffer_->append("\n");
 
-    snprintf(s, sizeof(s), "RenderingIntent = \"%s\"\n",
-	     header->cupsRenderingIntent);
+    snprintf(s, sizeof(s), "RenderingIntent = \"%s\"\n", header->cupsRenderingIntent);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "PageSizeName = \"%s\"\n",
-	     header->cupsPageSizeName);
+    snprintf(s, sizeof(s), "PageSizeName = \"%s\"\n", header->cupsPageSizeName);
     header_buffer_->append(s);
   }
   else
@@ -782,15 +706,10 @@ RasterView::load_attrs()
     snprintf(s, sizeof(s), "Duplex = %d\n", header->Duplex);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "HWResolution = [ %d %d ]\n",
-	     header->HWResolution[0], header->HWResolution[1]);
+    snprintf(s, sizeof(s), "HWResolution = [ %d %d ]\n", header->HWResolution[0], header->HWResolution[1]);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "ImagingBoundingBox = [ %d %d %d %d ]\n",
-	     header->ImagingBoundingBox[0],
-	     header->ImagingBoundingBox[1],
-	     header->ImagingBoundingBox[2],
-	     header->ImagingBoundingBox[3]);
+    snprintf(s, sizeof(s), "ImagingBoundingBox = [ %d %d %d %d ]\n", header->ImagingBoundingBox[0], header->ImagingBoundingBox[1], header->ImagingBoundingBox[2], header->ImagingBoundingBox[3]);
     header_buffer_->append(s);
 
     snprintf(s, sizeof(s), "InsertSheet = %d\n", header->InsertSheet);
@@ -802,8 +721,7 @@ RasterView::load_attrs()
     snprintf(s, sizeof(s), "LeadingEdge = %d\n", header->LeadingEdge);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "Margins = [ %d %d ]\n",
-	     header->Margins[0], header->Margins[1]);
+    snprintf(s, sizeof(s), "Margins = [ %d %d ]\n", header->Margins[0], header->Margins[1]);
     header_buffer_->append(s);
 
     snprintf(s, sizeof(s), "ManualFeed = %d\n", header->ManualFeed);
@@ -830,8 +748,7 @@ RasterView::load_attrs()
     snprintf(s, sizeof(s), "OutputFaceUp = %d\n", header->OutputFaceUp);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "PageSize = [ %d %d ]\n", header->PageSize[0],
-	     header->PageSize[1]);
+    snprintf(s, sizeof(s), "PageSize = [ %d %d ]\n", header->PageSize[0], header->PageSize[1]);
     header_buffer_->append(s);
 
     snprintf(s, sizeof(s), "Separations = %d\n", header->Separations);
@@ -861,16 +778,10 @@ RasterView::load_attrs()
     snprintf(s, sizeof(s), "cupsBytesPerLine = %d\n", header->cupsBytesPerLine);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "cupsColorOrder = %s\n",
-	     header->cupsColorOrder == CUPS_ORDER_CHUNKED ? "CUPS_ORDER_CHUNKED" :
-		 header->cupsColorOrder == CUPS_ORDER_BANDED ? "CUPS_ORDER_BANDED" :
-		 header->cupsColorOrder == CUPS_ORDER_PLANAR ? "CUPS_ORDER_PLANAR" :
-		 "UNKNOWN");
+    snprintf(s, sizeof(s), "cupsColorOrder = %s\n", header->cupsColorOrder == CUPS_ORDER_CHUNKED ? "CHUNKED" : header->cupsColorOrder == CUPS_ORDER_BANDED ? "BANDED" : header->cupsColorOrder == CUPS_ORDER_PLANAR ? "PLANAR" : "UNKNOWN");
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "cupsColorSpace = %s\n",
-	     header->cupsColorSpace < (int)(sizeof(cspaces) / sizeof(cspaces[0])) ?
-		 cspaces[header->cupsColorSpace] : "UNKNOWN");
+    snprintf(s, sizeof(s), "cupsColorSpace = %s\n", _cupsRasterColorSpaceString(header->cupsColorSpace));
     header_buffer_->append(s);
 
     snprintf(s, sizeof(s), "cupsCompression = %d\n", header->cupsCompression);
@@ -888,23 +799,18 @@ RasterView::load_attrs()
     snprintf(s, sizeof(s), "cupsNumColors = %d\n", header->cupsNumColors);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "cupsBorderlessScalingFactor = %f\n",
-	     header->cupsBorderlessScalingFactor);
+    snprintf(s, sizeof(s), "cupsBorderlessScalingFactor = %f\n", header->cupsBorderlessScalingFactor);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "cupsPageSize = [ %f %f ]\n",
-	     header->cupsPageSize[0], header->cupsPageSize[1]);
+    snprintf(s, sizeof(s), "cupsPageSize = [ %f %f ]\n", header->cupsPageSize[0], header->cupsPageSize[1]);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "cupsImagingBBox = [ %f %f %f %f ]\n",
-	     header->cupsImagingBBox[0], header->cupsImagingBBox[1],
-	     header->cupsImagingBBox[2], header->cupsImagingBBox[3]);
+    snprintf(s, sizeof(s), "cupsImagingBBox = [ %f %f %f %f ]\n", header->cupsImagingBBox[0], header->cupsImagingBBox[1], header->cupsImagingBBox[2], header->cupsImagingBBox[3]);
     header_buffer_->append(s);
 
     for (i = 0; i < 16; i ++)
     {
-      snprintf(s, sizeof(s), "cupsInteger%d = %d\n", i + 1,
-	       header->cupsInteger[i]);
+      snprintf(s, sizeof(s), "cupsInteger%d = %u\n", i + 1, header->cupsInteger[i]);
       header_buffer_->append(s);
     }
 
@@ -916,21 +822,17 @@ RasterView::load_attrs()
 
     for (i = 0; i < 16; i ++)
     {
-      snprintf(s, sizeof(s), "cupsString%d = \"%s\"\n", i + 1,
-	       header->cupsString[i]);
+      snprintf(s, sizeof(s), "cupsString%d = \"%s\"\n", i + 1, header->cupsString[i]);
       header_buffer_->append(s);
     }
 
-    snprintf(s, sizeof(s), "cupsMarkerType = \"%s\"\n",
-	     header->cupsMarkerType);
+    snprintf(s, sizeof(s), "cupsMarkerType = \"%s\"\n", header->cupsMarkerType);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "cupsRenderingIntent = \"%s\"\n",
-	     header->cupsRenderingIntent);
+    snprintf(s, sizeof(s), "cupsRenderingIntent = \"%s\"\n", header->cupsRenderingIntent);
     header_buffer_->append(s);
 
-    snprintf(s, sizeof(s), "cupsPageSizeName = \"%s\"\n",
-	     header->cupsPageSizeName);
+    snprintf(s, sizeof(s), "cupsPageSizeName = \"%s\"\n", header->cupsPageSizeName);
     header_buffer_->append(s);
   }
 
