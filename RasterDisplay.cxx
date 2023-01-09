@@ -558,7 +558,7 @@ RasterDisplay::image_cb(void  *p,	// I - Raster display widget
   xstep   = display->xstep_ * bpp;
   xmod    = display->xmod_;
   xsize   = display->xsize_;
-  xerr    = (X * xmod + xmod / 2) % xsize;
+  xerr    = (X * xmod) % xsize;
   X       = (X + display->xscrollbar_.value()) * display->header_.cupsWidth / xsize;
   Y       = (Y + display->yscrollbar_.value()) * display->header_.cupsHeight / display->ysize_;
   inptr   = display->pixels_ + (Y * display->header_.cupsWidth + X) * bpp;
