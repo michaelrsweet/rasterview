@@ -88,13 +88,14 @@ main(int  argc,				// I - Number of command-line arguments
 
   // Write a test page in the usual color spaces...
   write_page(ras, width, height, CUPS_CSPACE_W, 8);
-  write_page(ras, width, height, CUPS_CSPACE_RGB, 8);
+  write_page(ras, width, height, CUPS_CSPACE_RGB, 24);
   write_page(ras, width, height, CUPS_CSPACE_K, 1);
   write_page(ras, width, height, CUPS_CSPACE_K, 8);
-  write_page(ras, width, height, CUPS_CSPACE_CMYK, 8);
+  write_page(ras, width, height, CUPS_CSPACE_CMY, 24);
+  write_page(ras, width, height, CUPS_CSPACE_CMYK, 32);
   write_page(ras, width, height, CUPS_CSPACE_SW, 8);
-  write_page(ras, width, height, CUPS_CSPACE_SRGB, 8);
-  write_page(ras, width, height, CUPS_CSPACE_ADOBERGB, 8);
+  write_page(ras, width, height, CUPS_CSPACE_SRGB, 24);
+  write_page(ras, width, height, CUPS_CSPACE_ADOBERGB, 24);
 
   // Close the raster stream and return...
   cupsRasterClose(ras);
@@ -135,6 +136,215 @@ write_page(cups_raster_t *ras,		// I - Raster stream
 			*lineptr;	// Pointer into line
 
 
-  //
+  // Initialize the page header and allocate memory for the line...
+  memset(&header, 0, sizeof(header));
+  header.cupsWidth        = width;
+  header.cupsHeight       = height;
+  header.cupsColorSpace   = cspace;
+  header.cupsColorOrder   = CUPS_ORDER_CHUNKED;
+  header.cupsBitsPerPixel = bpp;
+  header.cupsBitsPerColor = bpp == 1 ? 1 : 8;
+  header.cupsNumColors    = (bpp + 7) / 8;
+  header.cupsBytesPerLine = (width * bpp + 7) / 8;
 
+  if ((line = malloc(header.cupsBytesPerLine)) == NULL)
+  {
+    perror("testraster: Unable to allocate memory for line");
+    return;
+  }
+
+  cupsRasterWriteHeader(ras, &header);
+
+  width -= 4;
+  height -= 4;
+
+  // Write the first two lines (top black line and side borders)
+  if (cspace == CUPS_CSPACE_K || cspace == CUPS_CSPACE_CMY)
+  {
+    memset(line, 255, header.cupsBytesPerLine);
+    cupsRasterWritePixels(ras, line, header.cupsBytesPerLine);
+
+    if (bpp == 1)
+    {
+      // 1-bit black, clear all but the first and last bits...
+      if (header.cupsBytesPerLine > 2)
+	memset(line + 1, 0, header.cupsBytesPerLine - 2);
+
+      line[0] = 0x80;
+      line[header.cupsBytesPerLine - 1] = 128 >> (width & 7);
+    }
+    else
+    {
+      // 8-bit black or 24-bit CMY,  clear all but the first and last pixels
+      memset(line + bpp / 8, 0, header.cupsBytesPerLine - bpp / 4);
+    }
+  }
+  else if (bpp == 32)
+  {
+    // 32-bit CMYK
+    memset(line, 0, header.cupsBytesPerLine);
+    for (x = 3; x < header.cupsBytesPerLine; x += 4)
+      line[x] = 255;
+    cupsRasterWritePixels(ras, line, header.cupsBytesPerLine);
+
+    memset(line + bpp / 8, 0, header.cupsBytesPerLine - bpp / 4);
+  }
+  else
+  {
+    memset(line, 0, header.cupsBytesPerLine);
+    cupsRasterWritePixels(ras, line, header.cupsBytesPerLine);
+
+    memset(line + bpp / 8, 255, header.cupsBytesPerLine - bpp / 4);
+  }
+
+  cupsRasterWritePixels(ras, line, header.cupsBytesPerLine);
+
+  // Write the interior lines...
+  for (y = 0; y < height; y ++)
+  {
+    unsigned char	mask, bit;	// Mask and current bit
+    unsigned		color;		// Current color
+
+    switch (bpp)
+    {
+      case 1 :
+	  if (header.cupsBytesPerLine > 2)
+	    memset(line + 1, 0, header.cupsBytesPerLine - 2);
+
+	  line[0] = 0x80;
+	  line[header.cupsBytesPerLine - 1] = 128 >> (width & 7);
+
+          for (x = 0, bit = 128 >> ((x + 2) & 7), lineptr = line; x < width; x ++)
+          {
+            static unsigned char masks[4][2] =
+            {
+              { 0x55, 0x00 },
+              { 0x55, 0xaa },
+              { 0xff, 0xaa },
+              { 0xff, 0xff }
+            };
+
+            color = ((x / 8) * (y / 8)) & 3;
+            mask  = masks[color][y & 1];
+
+            if (mask & bit)
+              *lineptr |= bit;
+
+            if (bit > 1)
+            {
+              bit /= 2;
+            }
+            else
+            {
+              bit = 128;
+              lineptr ++;
+            }
+          }
+          break;
+
+      case 8 :
+          for (x = 0, lineptr = line + 2; x < width; x ++)
+          {
+            color = (((x / 8) * (y / 8)) % 15) + 1;
+
+	    if (cspace == CUPS_CSPACE_K)
+	      *lineptr++ = color * 0x11;
+	    else
+	      *lineptr++ = 255 - color * 0x11;
+          }
+          break;
+
+      case 24 :
+          for (x = 0, lineptr = line + 6; x < width; x ++)
+          {
+            color = (((x / 8) * (y / 8)) % 27) + 1;
+
+	    if (cspace == CUPS_CSPACE_CMY)
+	    {
+	      *lineptr++ = 127 * ((color / 9) % 3);
+	      *lineptr++ = 127 * ((color / 3) % 3);
+	      *lineptr++ = 127 * (color % 3);
+	    }
+	    else
+	    {
+	      *lineptr++ = 255 - 127 * ((color / 9) % 3);
+	      *lineptr++ = 255 - 127 * ((color / 3) % 3);
+	      *lineptr++ = 255 - 127 * (color % 3);
+	    }
+          }
+          break;
+
+      case 32 :
+          for (x = 0, lineptr = line + 8; x < width; x ++)
+          {
+            color = (((x / 8) * (y / 8)) % 27) + 1;
+
+            if (color < 27)
+            {
+	      *lineptr++ = 127 * ((color / 9) % 3);
+	      *lineptr++ = 127 * ((color / 3) % 3);
+	      *lineptr++ = 127 * (color % 3);
+	      *lineptr++ = 0;
+	    }
+	    else
+	    {
+	      *lineptr++ = 0;
+	      *lineptr++ = 0;
+	      *lineptr++ = 0;
+	      *lineptr++ = 255;
+	    }
+          }
+          break;
+    }
+
+    cupsRasterWritePixels(ras, line, header.cupsBytesPerLine);
+  }
+
+  // Write the last two lines (side borders and bottom black line)
+  if (cspace == CUPS_CSPACE_K || cspace == CUPS_CSPACE_CMY)
+  {
+    if (bpp == 1)
+    {
+      // 1-bit black, clear all but the first and last bits...
+      if (header.cupsBytesPerLine > 2)
+	memset(line + 1, 0, header.cupsBytesPerLine - 2);
+
+      line[0] = 0x80;
+      line[header.cupsBytesPerLine - 1] = 128 >> (width & 7);
+    }
+    else
+    {
+      // 8-bit black or 24-bit CMY,  clear all but the first and last pixels
+      memset(line, 255, bpp / 8);
+      memset(line + bpp / 8, 0, header.cupsBytesPerLine - bpp / 4);
+      memset(line + header.cupsBytesPerLine - bpp / 8, 255, bpp / 8);
+    }
+
+    cupsRasterWritePixels(ras, line, header.cupsBytesPerLine);
+
+    memset(line, 255, header.cupsBytesPerLine);
+  }
+  else if (bpp == 32)
+  {
+    // 32-bit CMYK
+    memset(line, 0, header.cupsBytesPerLine);
+    line[3] = 255;
+    line[header.cupsBytesPerLine - 1] = 255;
+
+    cupsRasterWritePixels(ras, line, header.cupsBytesPerLine);
+
+    for (x = 7; x < header.cupsBytesPerLine; x += 4)
+      line[x] = 255;
+  }
+  else
+  {
+    memset(line, 0, bpp / 8);
+    memset(line + bpp / 8, 255, header.cupsBytesPerLine - bpp / 4);
+    memset(line + header.cupsBytesPerLine - bpp / 8, 0, bpp / 8);
+    cupsRasterWritePixels(ras, line, header.cupsBytesPerLine);
+
+    memset(line, 0, header.cupsBytesPerLine);
+  }
+
+  cupsRasterWritePixels(ras, line, header.cupsBytesPerLine);
 }

@@ -369,19 +369,15 @@ RasterDisplay::handle(int event)	// I - Event to handle
 		return (1);
 
             case '1' : // 100%
-	        scale(1.0f);
-		return (1);
-
             case '2' : // 200%
-	        scale(2.0f);
-		return (1);
-
             case '3' : // 300%
-	        scale(3.0f);
-		return (1);
-
             case '4' : // 400%
-	        scale(4.0f);
+            case '5' : // 500%
+            case '6' : // 600%
+            case '7' : // 700%
+            case '8' : // 800%
+            case '9' : // 900%
+	        scale((float)(Fl::event_key() - '0'));
 		return (1);
 	  }
 	  break;
@@ -562,7 +558,7 @@ RasterDisplay::image_cb(void  *p,	// I - Raster display widget
   xstep   = display->xstep_ * bpp;
   xmod    = display->xmod_;
   xsize   = display->xsize_;
-  xerr    = (X * xmod) % xsize;
+  xerr    = (X * xmod + xmod / 2) % xsize;
   X       = (X + display->xscrollbar_.value()) * display->header_.cupsWidth / xsize;
   Y       = (Y + display->yscrollbar_.value()) * display->header_.cupsHeight / display->ysize_;
   inptr   = display->pixels_ + (Y * display->header_.cupsWidth + X) * bpp;
