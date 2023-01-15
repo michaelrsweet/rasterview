@@ -28,9 +28,8 @@ CC		=	@CC@
 CFLAGS		=	$(ARCHFLAGS) $(CPPFLAGS) $(OPTIM) @CFLAGS@ @DEFS@
 CP		=	@CP@
 CODE_SIGN	=	@CODE_SIGN@
-CODESIGN_IDENTITY =	-
 CPPFLAGS	=	@CPPFLAGS@
-CSFLAGS		=	-s "$(CODESIGN_IDENTITY)" @CSFLAGS@ --timestamp
+CSFLAGS		=	-s "$${CODESIGN_IDENTITY:=-}" @CSFLAGS@ --timestamp
 CXX		=	@CXX@
 CXXFLAGS	=	$(ARCHFLAGS) $(CPPFLAGS) $(OPTIM) @CXXFLAGS@ @DEFS@
 FLTKCONFIG	=	@FLTKCONFIG@
@@ -69,6 +68,7 @@ all:	rasterview testcie testraster
 
 clean:
 	$(RM) rasterview testcie testraster
+	$(RM) RasterView.app/Contents/MacOS/RasterView
 	$(RM) $(OBJS)
 	$(RM) *.bck
 	$(RM) *~
@@ -82,7 +82,6 @@ distclean:	clean
 	$(RM) -r autom4te*
 	$(RM) config.*
 	$(RM) Makefile
-	$(RM) RasterView.app/Contents/MacOS/rasterview
 
 
 install: all @INSTALLDESKTOP@
@@ -120,11 +119,11 @@ dmg:	all
 	rm -f RasterView.zip
 	ditto -c -k --keepParent RasterView.app RasterView.zip
 	echo Notarizing application
-	xcrun altool --notarize-app -f RasterView.zip \
-		--primary-bundle-id org.msweet.rasterview \
-		--username "$(APPLEID)" \
-		--password "@keychain:AC_$(TEAMID)" \
-		--asc-provider "$(TEAMID)"
+	xcrun notarytool submit RasterView.zip \
+		--apple-id "$${APPLEID}" \
+		--keychain-profile "AC_$${TEAMID}" \
+		--team-id "$${TEAMID}" \
+		--wait
 	echo Making disk image
 	rm -f rasterview-$(VERSION).dmg
 	dmgbuild -s dmgbuild.py "RasterView $(VERSION)" ~/Desktop/rasterview-$(VERSION)-macos.dmg
