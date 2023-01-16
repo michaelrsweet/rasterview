@@ -8,6 +8,7 @@ Changes in v1.9 (YYYY-MM-DD)
 - Fixed macOS 'Close' and 'Re-Open' menu items (Issue #20)
 - Fixed color picking (Issue #21)
 - Updated the maximum zoom to 20x
+- Added Visual Studio project files for Windows release
 
 
 Changes in v1.8 (2021-07-17)
