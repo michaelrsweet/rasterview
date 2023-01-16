@@ -26,7 +26,9 @@
 #  ifdef __cplusplus
 extern "C" {
 #  endif // __cplusplus
-
+#  if _WIN32
+typedef __int64 ssize_t;		// Standard POSIX type not supported on Windows...
+#  endif // _WIN32
 
 //
 // Constants...

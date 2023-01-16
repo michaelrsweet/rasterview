@@ -2,7 +2,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{420B46E3-951B-4741-8DC4-09729D3C1A81}") = "rasterview", "rasterview.vcxproj", "{1BD9CA83-E4D3-4AA5-B327-92BF7C0CEE6C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rasterview", "rasterview.vcxproj", "{1BD9CA83-E4D3-4AA5-B327-92BF7C0CEE6C}"
+EndProject
+Project("{840C416C-B8F3-42BC-B0DD-F6BB14C9F8CB}") = "rasterview-installer", "rasterview-installer.aiproj", "{BCD3FD2E-2B85-4EC5-AADA-59DE38F72C4B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,5 +22,19 @@ Global
 		{1BD9CA83-E4D3-4AA5-B327-92BF7C0CEE6C}.DefaultBuild|x64.Build.0 = Debug|x64
 		{1BD9CA83-E4D3-4AA5-B327-92BF7C0CEE6C}.Release|x64.ActiveCfg = Release|x64
 		{1BD9CA83-E4D3-4AA5-B327-92BF7C0CEE6C}.Release|x64.Build.0 = Release|x64
+		{BCD3FD2E-2B85-4EC5-AADA-59DE38F72C4B}.All|x64.ActiveCfg = DefaultBuild
+		{BCD3FD2E-2B85-4EC5-AADA-59DE38F72C4B}.All|x64.Build.0 = DefaultBuild
+		{BCD3FD2E-2B85-4EC5-AADA-59DE38F72C4B}.Debug|x64.ActiveCfg = DefaultBuild
+		{BCD3FD2E-2B85-4EC5-AADA-59DE38F72C4B}.Debug|x64.Build.0 = DefaultBuild
+		{BCD3FD2E-2B85-4EC5-AADA-59DE38F72C4B}.DefaultBuild|x64.ActiveCfg = DefaultBuild
+		{BCD3FD2E-2B85-4EC5-AADA-59DE38F72C4B}.DefaultBuild|x64.Build.0 = DefaultBuild
+		{BCD3FD2E-2B85-4EC5-AADA-59DE38F72C4B}.Release|x64.ActiveCfg = DefaultBuild
+		{BCD3FD2E-2B85-4EC5-AADA-59DE38F72C4B}.Release|x64.Build.0 = DefaultBuild
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3F254341-C3A1-4A61-A4A0-2153D5A63952}
 	EndGlobalSection
 EndGlobal

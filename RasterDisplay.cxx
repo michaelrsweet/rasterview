@@ -16,7 +16,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#if _WIN32
+#  include <io.h>
+#else
+#  include <unistd.h>
+#endif // _WIN32
 #include <fcntl.h>
 #include <errno.h>
 #include <math.h>
