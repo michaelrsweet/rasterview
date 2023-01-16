@@ -7,12 +7,12 @@
     <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
     <ROW Property="AI_CURRENT_YEAR" Value="2023" ValueLocId="-"/>
     <ROW Property="AI_PACKAGING_TOOL" Value="Advanced Installer 20.2 build 2c3f1cf9" ValueLocId="-"/>
-    <ROW Property="AI_PROPPATH_DIR_PERBUILD_rasterview.exe" Value="x64\Debug\rasterview"/>
-    <ROW Property="AI_PROPPATH_FILENAME_PERBUILD_rasterview.exe" Value="rasterview.exe"/>
     <ROW Property="ALLUSERS" Value="1"/>
     <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
     <ROW Property="ARPPRODUCTICON" Value="rasterview.exe" Type="8"/>
     <ROW Property="ARPURLINFOABOUT" Value="https://www.msweet.org/rasterview"/>
+    <ROW Property="BannerBitmap" Value="banner.jpg" MultiBuildValue="DefaultBuild:rasterviewinstaller.jpg" Type="1" MsiKey="BannerBitmap"/>
+    <ROW Property="DialogBitmap" Value="dialog.jpg" MultiBuildValue="DefaultBuild:rasterviewwelcome.jpg" Type="1" MsiKey="DialogBitmap"/>
     <ROW Property="Manufacturer" Value="Michael R Sweet"/>
     <ROW Property="ProductCode" Value="1033:{13E9705B-FB04-4133-B919-02189EF36934} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
@@ -35,17 +35,15 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiDirsComponent">
     <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1"/>
-    <ROW Directory="SHORTCUTDIR" Directory_Parent="TARGETDIR" DefaultDir="SHORTC~1|SHORTCUTDIR" IsPseudoRoot="1"/>
     <ROW Directory="TARGETDIR" DefaultDir="SourceDir"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCompsComponent">
     <ROW Component="APPDIR" ComponentId="{E59C6DCD-68F0-478F-9CC0-425C11073299}" Directory_="APPDIR" Attributes="0"/>
     <ROW Component="ApplicationDescription" ComponentId="{B917BB05-1705-4A04-AA43-784E3AB8E640}" Directory_="APPDIR" Attributes="4" Condition="(VersionNT &gt;= 600)" KeyPath="ApplicationDescription"/>
     <ROW Component="ProductInformation" ComponentId="{09820C84-9417-439A-90AE-E045F0B61A14}" Directory_="APPDIR" Attributes="260" KeyPath="Version"/>
-    <ROW Component="SHORTCUTDIR" ComponentId="{E08A5517-8464-41BC-A693-569962D5EDAA}" Directory_="SHORTCUTDIR" Attributes="0"/>
     <ROW Component="jpeg62.dll" ComponentId="{321640EB-EF88-43A8-90BA-C115C3706B31}" Directory_="APPDIR" Attributes="256" KeyPath="jpeg62.dll"/>
     <ROW Component="libpng16.dll" ComponentId="{401CC5B2-F097-453C-8B1E-1F1606B7220A}" Directory_="APPDIR" Attributes="256" KeyPath="libpng16.dll"/>
-    <ROW Component="rasterview_PrimaryOutput" ComponentId="{AE7548BB-18AB-4ADF-9F29-C1A686287FB7}" Directory_="APPDIR" Attributes="0" KeyPath="rasterview.exe"/>
+    <ROW Component="rasterview.exe" ComponentId="{AC579206-85AE-4B39-A64B-9A4D2FA5FB4A}" Directory_="APPDIR" Attributes="256" KeyPath="rasterview.exe"/>
     <ROW Component="turbojpeg.dll" ComponentId="{18F7158A-B087-4027-B9D4-7EAE67D0DB29}" Directory_="APPDIR" Attributes="256" KeyPath="turbojpeg.dll"/>
     <ROW Component="zlib.dll" ComponentId="{36EAB87E-B4AD-4B3B-AC21-BE74708CC208}" Directory_="APPDIR" Attributes="256" KeyPath="zlib.dll"/>
   </COMPONENT>
@@ -56,12 +54,9 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
     <ROW File="jpeg62.dll" Component_="jpeg62.dll" FileName="jpeg62.dll" Attributes="0" SourcePath="packages\libjpeg-turbo-v142.2.0.4.3\build\native\bin\x64\v142\Release\jpeg62.dll" SelfReg="false"/>
     <ROW File="turbojpeg.dll" Component_="turbojpeg.dll" FileName="TURBOJ~1.DLL|turbojpeg.dll" Attributes="0" SourcePath="packages\libjpeg-turbo-v142.2.0.4.3\build\native\bin\x64\v142\Release\turbojpeg.dll" SelfReg="false"/>
-    <ROW File="rasterview.exe" Component_="rasterview_PrimaryOutput" FileName="RASTER~1.EXE|[|AI_PROPPATH_FILENAME_PERBUILD_rasterview.exe]" Attributes="0" SourcePath="&lt;AI_APPPATH_PERBUILD_rasterview.exe&gt;" SelfReg="false"/>
     <ROW File="libpng16.dll" Component_="libpng16.dll" FileName="libpng16.dll" Attributes="0" SourcePath="packages\libpng_native.redist.1.6.30\build\native\bin\x64\Release\libpng16.dll" SelfReg="false"/>
     <ROW File="zlib.dll" Component_="zlib.dll" FileName="zlib.dll" Attributes="0" SourcePath="packages\zlib_native.redist.1.2.11\build\native\bin\x64\Release\zlib.dll" SelfReg="false"/>
-  </COMPONENT>
-  <COMPONENT cid="caphyon.advinst.msicomp.AppPathsComponent">
-    <ROW Name="AI_APPPATH_PERBUILD_rasterview.exe" Path="[|AI_PROPPATH_DIR_PERBUILD_rasterview.exe]\[|AI_PROPPATH_FILENAME_PERBUILD_rasterview.exe]" Type="2" Content="0"/>
+    <ROW File="rasterview.exe" Component_="rasterview.exe" FileName="RASTER~1.EXE|rasterview.exe" Attributes="0" SourcePath="x64\Release\rasterview\rasterview.exe" SelfReg="false" DigSign="true"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
     <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[AppDataFolder][|Manufacturer]\[|ProductName]\prerequisites" Options="2"/>
@@ -93,6 +88,8 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiBinaryComponent">
     <ROW Name="aicustact.dll" SourcePath="&lt;AI_CUSTACTS&gt;aicustact.dll"/>
+    <ROW Name="rasterviewinstaller.jpg" SourcePath="rasterview-installer.jpg"/>
+    <ROW Name="rasterviewwelcome.jpg" SourcePath="rasterview-welcome.jpg"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiControlEventComponent">
     <ROW Dialog_="WelcomeDlg" Control_="Next" Event="NewDialog" Argument="FolderDlg" Condition="AI_INSTALL" Ordering="1"/>
@@ -120,7 +117,6 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCreateFolderComponent">
     <ROW Directory_="APPDIR" Component_="APPDIR" ManualDelete="true"/>
-    <ROW Directory_="SHORTCUTDIR" Component_="SHORTCUTDIR" ManualDelete="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCustActComponent">
     <ROW Action="AI_DOWNGRADE" Type="19" Target="4010"/>
@@ -137,21 +133,15 @@
     <ROW Action="SET_SHORTCUTDIR" Type="307" Source="SHORTCUTDIR" Target="[ProgramMenuFolder][ProductName]"/>
     <ROW Action="SET_TARGETDIR_TO_APPDIR" Type="51" Source="TARGETDIR" Target="[APPDIR]"/>
   </COMPONENT>
-  <COMPONENT cid="caphyon.advinst.msicomp.MsiExtComponent">
-    <ROW Extension="pwg" Component_="rasterview_PrimaryOutput" ProgId_="[|Manufacturer].[|ProductName]" MIME_="image/pwg-raster" Feature_="MainFeature" Options="32"/>
-    <ROW Extension="ras" Component_="rasterview_PrimaryOutput" ProgId_="[|Manufacturer].[|ProductName]_1" MIME_="application/vnd.cups-raster" Feature_="MainFeature" Options="32"/>
-    <ROW Extension="urf" Component_="rasterview_PrimaryOutput" ProgId_="[|Manufacturer].[|ProductName]_2" MIME_="image/urf" Feature_="MainFeature" Options="32"/>
-  </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatCompsComponent">
     <ROW Feature_="MainFeature" Component_="APPDIR"/>
     <ROW Feature_="MainFeature" Component_="ProductInformation"/>
     <ROW Feature_="MainFeature" Component_="jpeg62.dll"/>
     <ROW Feature_="MainFeature" Component_="turbojpeg.dll"/>
-    <ROW Feature_="MainFeature" Component_="rasterview_PrimaryOutput"/>
-    <ROW Feature_="MainFeature" Component_="SHORTCUTDIR"/>
     <ROW Feature_="MainFeature" Component_="libpng16.dll"/>
     <ROW Feature_="MainFeature" Component_="zlib.dll"/>
     <ROW Feature_="MainFeature" Component_="ApplicationDescription"/>
+    <ROW Feature_="MainFeature" Component_="rasterview.exe"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
     <ROW Name="rasterview.exe" SourcePath="rasterview.ico" Index="0"/>
@@ -179,11 +169,6 @@
     <ROW Condition="(VersionNT &lt;&gt; 500)" Description="[ProductName] cannot be installed on [WindowsTypeNT50Display]." DescriptionLocId="AI.LaunchCondition.NoNT50" IsPredefined="true" Builds="DefaultBuild"/>
     <ROW Condition="VersionNT" Description="[ProductName] cannot be installed on [WindowsType9XDisplay]." DescriptionLocId="AI.LaunchCondition.No9X" IsPredefined="true" Builds="DefaultBuild"/>
   </COMPONENT>
-  <COMPONENT cid="caphyon.advinst.msicomp.MsiMimeComponent">
-    <ROW ContentType="application/vnd.cups-raster" Extension_="ras" Component_="rasterview_PrimaryOutput"/>
-    <ROW ContentType="image/pwg-raster" Extension_="pwg" Component_="rasterview_PrimaryOutput"/>
-    <ROW ContentType="image/urf" Extension_="urf" Component_="rasterview_PrimaryOutput"/>
-  </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiProgIdComponent">
     <ROW ProgId="[|Manufacturer].[|ProductName]"/>
     <ROW ProgId="[|Manufacturer].[|ProductName]_1"/>
@@ -204,22 +189,11 @@
     <ROW Registry="Software" Root="-1" Key="Software" Name="\"/>
     <ROW Registry="Version" Root="-1" Key="Software\[Manufacturer]\[ProductName]" Name="Version" Value="[ProductVersion]" Component_="ProductInformation"/>
   </COMPONENT>
-  <COMPONENT cid="caphyon.advinst.msicomp.MsiShortsComponent">
-    <ROW Shortcut="rasterview" Directory_="SHORTCUTDIR" Name="RASTER~2|RasterView" Component_="rasterview_PrimaryOutput" Target="[#rasterview.exe]" Hotkey="0" IconIndex="0" ShowCmd="1"/>
-  </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiThemeComponent">
     <ATTRIBUTE name="UsedTheme" value="classic"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiUpgradeComponent">
     <ROW UpgradeCode="[|UpgradeCode]" VersionMin="0.0.1" VersionMax="[|ProductVersion]" Attributes="257" ActionProperty="OLDPRODUCTS"/>
     <ROW UpgradeCode="[|UpgradeCode]" VersionMin="[|ProductVersion]" Attributes="2" ActionProperty="AI_NEWERPRODUCTFOUND"/>
-  </COMPONENT>
-  <COMPONENT cid="caphyon.advinst.msicomp.MsiVerbComponent">
-    <ROW Extension_="pwg" Component_="rasterview_PrimaryOutput" Verb="open" Sequence="0" Command="&amp;Open" Argument="&quot;%1&quot;"/>
-    <ROW Extension_="ras" Component_="rasterview_PrimaryOutput" Verb="open" Sequence="0" Command="&amp;Open" Argument="&quot;%1&quot;"/>
-    <ROW Extension_="urf" Component_="rasterview_PrimaryOutput" Verb="open" Sequence="0" Command="&amp;Open" Argument="&quot;%1&quot;"/>
-  </COMPONENT>
-  <COMPONENT cid="caphyon.advinst.msicomp.VsProjectComponent">
-    <ROW ProjectId="{1bd9ca83-e4d3-4aa5-b327-92bf7c0cee6c}" ProjectName="rasterview" OutputGroup="PrimaryOutput" OutputFile="rasterview.exe"/>
   </COMPONENT>
 </DOCUMENT>

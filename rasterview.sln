@@ -5,6 +5,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rasterview", "rasterview.vcxproj", "{1BD9CA83-E4D3-4AA5-B327-92BF7C0CEE6C}"
 EndProject
 Project("{840C416C-B8F3-42BC-B0DD-F6BB14C9F8CB}") = "rasterview-installer", "rasterview-installer.aiproj", "{BCD3FD2E-2B85-4EC5-AADA-59DE38F72C4B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1BD9CA83-E4D3-4AA5-B327-92BF7C0CEE6C} = {1BD9CA83-E4D3-4AA5-B327-92BF7C0CEE6C}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
