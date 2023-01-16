@@ -1,2 +1,0 @@
-queries:
-  - exclude: cpp/resource-not-released-in-destructor
