@@ -61,13 +61,17 @@ OBJS		=	\
 			testcie.o \
 			testraster.o
 
+TESTS		=	\
+			testcie \
+			testraster
+
 
 # Standard install targets...
-all:	rasterview testcie testraster
+all:	rasterview
 
 
 clean:
-	$(RM) rasterview testcie testraster
+	$(RM) rasterview $(TESTS)
 	$(RM) RasterView.app/Contents/MacOS/RasterView
 	$(RM) $(OBJS)
 	$(RM) *.bck
@@ -75,7 +79,8 @@ clean:
 
 
 depend:
-	makedepend -Y -f .depend *.c *.cxx
+	$(CC) -MM $(CPPFLAGS) *.c | sed -e '1,$$s/ \/usr\/include\/[^ ]*//g' -e '1,$$s/ \/usr\/local\/include\/[^ ]*//g' | grep -v '^  \\' >Dependencies
+	$(CXX) -MM $(CPPFLAGS) *.cxx | sed -e '1,$$s/ \/usr\/include\/[^ ]*//g' -e '1,$$s/ \/usr\/local\/include\/[^ ]*//g' | grep -v '^  \\'  >>Dependencies
 
 
 distclean:	clean
@@ -109,6 +114,9 @@ uninstall-desktop:
 	$(RM) $(datadir)/icons/hicolor/32x32/apps/rasterview.png
 	$(RM) $(datadir)/icons/hicolor/128x128/apps/rasterview.png
 	$(RM) $(datadir)/mime/packages/rasterview.xml
+
+
+test: 	$(TESTS)
 
 
 # Make a disk image with the compiled program on macOS...

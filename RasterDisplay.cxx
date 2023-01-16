@@ -380,8 +380,10 @@ RasterDisplay::handle(int event)	// I - Event to handle
             case '6' : // 600%
             case '7' : // 700%
             case '8' : // 800%
-            case '9' : // 900%
 	        scale((float)(Fl::event_key() - '0'));
+		return (1);
+            case '9' : // 2000% (max)
+	        scale(20.0f);
 		return (1);
 	  }
 	  break;

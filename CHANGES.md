@@ -2,8 +2,8 @@ Changes in RasterView
 =====================
 
 
-Changes in v1.9 (YYYY-MM-DD)
-----------------------------
+Changes in v1.9.0 (2023-01-16)
+------------------------------
 
 - Fixed macOS 'Close' and 'Re-Open' menu items (Issue #20)
 - Fixed color picking (Issue #21)

@@ -1,7 +1,7 @@
 //
 // CUPS raster file viewer application window header file.
 //
-// Copyright 2002-2015 by Michael R Sweet.
+// Copyright 2002-2023 by Michael R Sweet.
 //
 // Licensed under Apache License v2.0.  See the file "LICENSE" for more
 // information.

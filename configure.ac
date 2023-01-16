@@ -10,7 +10,7 @@
 dnl We need at least autoconf 2.50...
 AC_PREREQ(2.60)
 
-AC_INIT([RasterView], [1.9], [https://github.com/michaelrsweet/rasterview/issues], [rasterview], [https://www.msweet.org/rasterview])
+AC_INIT([RasterView], [1.9.0], [https://github.com/michaelrsweet/rasterview/issues], [rasterview], [https://www.msweet.org/rasterview])
 
 dnl Version number...
 VERSION="AC_PACKAGE_VERSION"

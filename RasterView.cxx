@@ -62,10 +62,8 @@
 "<LI><CODE>Spacebar</CODE>: Show next page</LI>\n" \
 "<LI><CODE>Backspace/Delete</CODE>: Show previous page</LI>\n" \
 "<LI><CODE>0</CODE>: Zoom to fit</LI>\n" \
-"<LI><CODE>1</CODE>: Zoom 100%</LI>\n" \
-"<LI><CODE>2</CODE>: Zoom 200%</LI>\n" \
-"<LI><CODE>3</CODE>: Zoom 300%</LI>\n" \
-"<LI><CODE>4</CODE>: Zoom 400%</LI>\n" \
+"<LI><CODE>1</CODE> to <CODE>8</CODE>: Zoom Nx</LI>\n" \
+"<LI><CODE>9</CODE>: Zoom 20x</LI>\n" \
 "<LI><CODE>-</CODE>: Zoom out</LI>\n" \
 "<LI><CODE>=</CODE>: Zoom in</LI>\n" \
 "<LI><CODE>C</CODE>: Click or drag mouse to view colors</LI>\n" \
@@ -184,7 +182,7 @@ RasterView::color_cb(
   view->pixel_[sizeof(view->pixel_) - 1] = '\0';
 
   if (!ccolor || !cpixel)
-    strncpy(view->pixel_, "        -/=/0/1/2/3/4 to zoom", sizeof(view->pixel_) - 1);
+    strncpy(view->pixel_, "        -/=/0-9 to zoom", sizeof(view->pixel_) - 1);
   else
   {
     strncpy(view->pixel_, "       ", sizeof(view->pixel_) - 1);
@@ -433,7 +431,7 @@ RasterView::init()
     sub_group->resizable(page_input_);
     sub_group->end();
 
-    status_ = new Fl_Box(80, h() - 30, w() - 250, 30, "-/=/0/1/2/3/4 to zoom");
+    status_ = new Fl_Box(80, h() - 30, w() - 250, 30, "-/=/0-9 to zoom");
     status_->align((Fl_Align)(FL_ALIGN_CENTER | FL_ALIGN_INSIDE));
 
     sub_group = new Fl_Group(w() - 170, h() - 30, 120, 30);

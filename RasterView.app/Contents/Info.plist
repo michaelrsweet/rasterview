@@ -11,7 +11,7 @@
 	<string>org.msweet.rasterview</string>
 
 	<key>CFBundleVersion</key>
-	<string>1.9</string>
+	<string>1.9.0</string>
 
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
@@ -35,10 +35,10 @@
 	<string>rasterview.icns</string>
 
 	<key>CFBundleShortVersionString</key>
-	<string>1.9</string>
+	<string>1.9.0</string>
 
 	<key>CFBundleGetInfoString</key>
-	<string>1.9, Copyright © 2002-2023 by Michael R Sweet</string>
+	<string>1.9.0, Copyright © 2002-2023 by Michael R Sweet</string>
 
 	<key>CFBundleDocumentTypes</key>
 	<array>
