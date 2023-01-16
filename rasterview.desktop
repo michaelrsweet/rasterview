@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=RasterView
-Comment=CUPS Raster Viewer
+Comment=Apple/CUPS/PWG Raster Viewer
 Exec=rasterview %F
 Icon=rasterview
 Terminal=false
