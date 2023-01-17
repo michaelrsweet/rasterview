@@ -1,10 +1,10 @@
-RasterView - PWG/Apple Raster Viewer
-====================================
+RasterView - Apple/CUPS/PWG Raster File Viewer
+==============================================
 
 ![Version](https://img.shields.io/github/v/release/michaelrsweet/rasterview?include_prereleases)
 ![Apache 2.0](https://img.shields.io/github/license/michaelrsweet/rasterview)
 
-RasterView is a CUPS, PWG, and Apple raster file viewing application. It
+RasterView is a Apple, CUPS, and PWG raster file viewing application. It
 basically allows you to look at the raster data produced by any of the standard
 CUPS RIP filters (cgpdftoraster, imagetoraster, pdftoraster, and pstoraster) and
 is normally used to either test those filters or look at the data that is being
@@ -24,7 +24,8 @@ If you plan on (re)compiling it, you'll need FLTK (<http://www.fltk.org/>) 1.1.x
 or later and a C++ compiler.
 
 
-## How to Compile
+How to Compile
+--------------
 
 Run the following commands:
 
@@ -35,14 +36,15 @@ Run the following commands:
 How to Use
 ----------
 
-The program is called "rasterview" on UNIX/Linux and "RasterView.app" on macOS.
-Run the program and then open a raster file, or pass the filename on the
-command-line.  You can view multiple files simultaneously.
+The program is called "rasterview" on UNIX/Linux, "RasterView.app" on macOS, and
+"RasterView.exe" on Windows.  Run the program and then open a raster file, or
+pass the filename on the command-line.  You can view multiple files
+simultaneously.
 
 The "test" subdirectory includes a script for generating raster data using the
 standard RIP filters.  Run the following command for help:
 
-    tools/maketestfiles.sh help
+    test/maketestfiles.sh help
 
 
 Legal Stuff
