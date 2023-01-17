@@ -4,7 +4,7 @@ RasterView - Apple/CUPS/PWG Raster File Viewer
 ![Version](https://img.shields.io/github/v/release/michaelrsweet/rasterview?include_prereleases)
 ![Apache 2.0](https://img.shields.io/github/license/michaelrsweet/rasterview)
 
-RasterView is a Apple, CUPS, and PWG raster file viewing application. It
+RasterView is an Apple, CUPS, and PWG raster file viewing application. It
 basically allows you to look at the raster data produced by any of the standard
 CUPS RIP filters (cgpdftoraster, imagetoraster, pdftoraster, and pstoraster) and
 is normally used to either test those filters or look at the data that is being
