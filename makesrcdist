@@ -15,5 +15,9 @@ git tag -m "Tag $version" v$version
 git push origin v$version
 
 echo Creating rasterview-$version.tar.gz...
-git archive --format tar HEAD | gzip -v9 >~/Desktop/rasterview-$version.tar.gz
+git archive --format tar HEAD --prefix=rasterview-$version/ | gzip -v9 >~/Desktop/rasterview-$version.tar.gz
 gpg --detach-sign ~/Desktop/rasterview-$version.tar.gz
+
+echo Creating rasterview-$version.zip...
+git archive --format zip HEAD --prefix=rasterview-$version/ >~/Desktop/rasterview-$version.zip
+gpg --detach-sign ~/Desktop/rasterview-$version.zip
