@@ -16,7 +16,9 @@
     <LoadFromTemplate>
     </LoadFromTemplate>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'DefaultBuild' " />
+  <PropertyGroup Condition=" '$(Configuration)' == 'DefaultBuild' ">
+    <OutputPath>C:\Users\micha\source\repos\rasterview</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="rasterview-installer.aip">
       <SubType>Code</SubType>
