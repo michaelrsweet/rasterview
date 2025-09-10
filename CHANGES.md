@@ -2,6 +2,12 @@ Changes in RasterView
 =====================
 
 
+Changes in v1.9.1 (YYYY-MM-DD)
+------------------------------
+
+- Fixed 16-bit viewing support for many color spaces (Issue #23)
+
+
 Changes in v1.9.0 (2023-01-16)
 ------------------------------
 

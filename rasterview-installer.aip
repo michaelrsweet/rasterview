@@ -17,7 +17,7 @@
     <ROW Property="ProductCode" Value="1033:{13E9705B-FB04-4133-B919-02189EF36934} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="RasterView"/>
-    <ROW Property="ProductVersion" Value="1.9.0"/>
+    <ROW Property="ProductVersion" Value="1.9.1"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
     <ROW Property="UpgradeCode" Value="{E517517B-484A-4667-95A1-DF0EA50DCAB7}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>

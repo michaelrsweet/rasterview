@@ -1,6 +1,6 @@
 name: rasterview
-base: core20
-version: "1.9.0"
+base: core22
+version: "1.9.1"
 summary: Apple/CUPS/PWG Raster File Viewer
 description: |
   RasterView is an Apple, CUPS, and PWG raster file viewer.  It basically allows
@@ -21,20 +21,20 @@ architectures:
 
 apps:
     rasterview:
-        extensions: [gnome-3-38]
-        command: usr/bin/rasterview
-        desktop: usr/share/applications/Development/rasterview.desktop
-        plugs: [home, x11]
+        extensions: [gnome]
+        command: bin/rasterview
+        desktop: share/applications/Development/rasterview.desktop
+        plugs: [desktop, home, x11]
 
 parts:
     fltk:
         plugin: cmake
         cmake-parameters: [-DCMAKE_INSTALL_PREFIX=/usr,-DFLTK_BUILD_TEST=OFF,-DOPTION_USE_GL=OFF,-DOPTION_BUILD_HTML_DOCUMENTATION=OFF,-DOPTION_BUILD_PDF_DOCUMENTATION=OFF]
-        source: https://www.fltk.org/pub/fltk/snapshots/fltk-1.4.x-20221230-7e4306af.tar.bz2
+        source: https://github.com/fltk/fltk/releases/download/release-1.4.4/fltk-1.4.4-source.tar.bz2
         build-packages: [libx11-dev, libcairo2-dev, libjpeg-dev, libpng-dev, libxext-dev, libxft-dev, libxinerama-dev]
 
     main:
         plugin: autotools
-        autotools-configure-parameters: [--prefix=/usr]
+        autotools-configure-parameters: [--prefix=/]
         source: .
         after: [fltk]

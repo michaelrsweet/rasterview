@@ -50,7 +50,7 @@ standard RIP filters.  Run the following command for help:
 Legal Stuff
 -----------
 
-RasterView is Copyright © 2002-2023 by Michael R Sweet.
+RasterView is Copyright © 2002-2025 by Michael R Sweet.
 
 RasterView is provided under the terms of the Apache License, Version 2.0.  A
 copy of this license can be found in the file `LICENSE`.  Additional legal
