@@ -1,7 +1,7 @@
 //
 // CUPS/PWG Raster display widget methods.
 //
-// Copyright © 2002-2023 by Michael R Sweet.
+// Copyright © 2002-2025 by Michael R Sweet.
 //
 // Licensed under Apache License v2.0.  See the file "LICENSE" for more
 // information.
@@ -963,24 +963,15 @@ RasterDisplay::load_page()
       case CUPS_CSPACE_WHITE :
       case CUPS_CSPACE_GOLD :
       case CUPS_CSPACE_SILVER :
-          if (header_.cupsBitsPerColor >= 8)
-            convert_device(&header_, line, cptr, pptr, device_colors_);
-          else
-	    convert_k(&header_, line, cptr, pptr);
+	  convert_k(&header_, line, cptr, pptr);
 	  break;
 
       case CUPS_CSPACE_CMY :
-          if (header_.cupsBitsPerColor >= 8)
-            convert_device(&header_, line, cptr, pptr, device_colors_);
-          else
-	    convert_cmy(&header_, line, cptr, pptr);
+	  convert_cmy(&header_, line, cptr, pptr);
 	  break;
 
       case CUPS_CSPACE_YMC :
-          if (header_.cupsBitsPerColor >= 8)
-            convert_device(&header_, line, cptr, pptr, device_colors_);
-          else
-            convert_ymc(&header_, line, cptr, pptr);
+	  convert_ymc(&header_, line, cptr, pptr);
 	  break;
 
       case CUPS_CSPACE_KCMYcm :
@@ -990,26 +981,17 @@ RasterDisplay::load_page()
 	    break;
 	  }
       case CUPS_CSPACE_KCMY :
-          if (header_.cupsBitsPerColor >= 8)
-            convert_device(&header_, line, cptr, pptr, device_colors_);
-          else
-	    convert_kcmy(&header_, line, cptr, pptr);
+	  convert_kcmy(&header_, line, cptr, pptr);
 	  break;
 
       case CUPS_CSPACE_CMYK :
-          if (header_.cupsBitsPerColor >= 8)
-            convert_device(&header_, line, cptr, pptr, device_colors_);
-          else
-	    convert_cmyk(&header_, line, cptr, pptr);
+	  convert_cmyk(&header_, line, cptr, pptr);
 	  break;
 
       case CUPS_CSPACE_YMCK :
       case CUPS_CSPACE_GMCK :
       case CUPS_CSPACE_GMCS :
-          if (header_.cupsBitsPerColor >= 8)
-            convert_device(&header_, line, cptr, pptr, device_colors_);
-          else
-	    convert_ymck(&header_, line, cptr, pptr);
+	  convert_ymck(&header_, line, cptr, pptr);
 	  break;
 
       case CUPS_CSPACE_CIEXYZ :
