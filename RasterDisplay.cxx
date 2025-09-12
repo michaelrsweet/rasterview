@@ -253,7 +253,10 @@ RasterDisplay::draw()
     printf("    xoff=%d, yoff=%d, xsize_=%d, ysize_=%d, xstep_=%d, xmod_=%d\n", xoff, yoff, xsize_, ysize_, xstep_, xmod_);
 #endif // DEBUG
 
-    fl_draw_image(image_cb, this, xoff, yoff, xsize_ > W ? W : xsize_, ysize_ > H ? H : ysize_, bpp_);
+    if (bpp_ == 1)
+      fl_draw_image_mono(image_cb, this, xoff, yoff, xsize_ > W ? W : xsize_, ysize_ > H ? H : ysize_, bpp_);
+    else
+      fl_draw_image(image_cb, this, xoff, yoff, xsize_ > W ? W : xsize_, ysize_ > H ? H : ysize_, bpp_);
 
     fl_pop_clip();
   }
@@ -768,7 +771,7 @@ RasterDisplay::load_page()
           header_.cupsNumColors);
 #endif // DEBUG
 
-  bpp_ = ((header_.cupsBitsPerColor < 8 || !is_subtractive()) && header_.cupsNumColors == 1) ? 1 : 3;
+  bpp_ = header_.cupsNumColors == 1 ? 1 : 3;
 
   if (header_.cupsWidth == 0 || header_.cupsWidth > 1000000 || header_.cupsHeight == 0 || header_.cupsHeight > 1000000)
   {
