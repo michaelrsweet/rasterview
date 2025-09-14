@@ -27,14 +27,9 @@ apps:
         plugs: [desktop, home, x11]
 
 parts:
-    fltk:
-        plugin: cmake
-        cmake-parameters: [-DCMAKE_INSTALL_PREFIX=/usr,-DFLTK_BUILD_TEST=OFF,-DOPTION_USE_GL=OFF,-DOPTION_BUILD_HTML_DOCUMENTATION=OFF,-DOPTION_BUILD_PDF_DOCUMENTATION=OFF]
-        source: https://github.com/fltk/fltk/releases/download/release-1.4.4/fltk-1.4.4-source.tar.bz2
-        build-packages: [libx11-dev, libcairo2-dev, libjpeg-dev, libpng-dev, libxext-dev, libxft-dev, libxinerama-dev]
-
     main:
         plugin: autotools
-        autotools-configure-parameters: [--prefix=/]
+        autotools-configure-parameters: [--prefix=/ --datarootdir=/share]
         source: .
-        after: [fltk]
+        build-packages: [build-essential, pkg-config, libfltk1.3-dev, libjpeg-turbo8-dev, libpng-dev, zlib1g-dev]
+        stage-packages: [libfltk-images1.3, libfltk1.3, libfontconfig1, libfreetype6, libjpeg-turbo8, libpng16-16, libx11-6, libxau6, libxcb1, libxcursor1, libxdmcp6, libxext6, libxfixes3, libxft2, libxinerama1, libxrender1]
