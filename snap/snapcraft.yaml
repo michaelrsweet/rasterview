@@ -22,14 +22,14 @@ architectures:
 apps:
     rasterview:
         extensions: [gnome]
-        command: bin/rasterview
-        desktop: share/applications/Development/rasterview.desktop
+        command: usr/bin/rasterview
+        desktop: usr/share/applications/Development/rasterview.desktop
         plugs: [desktop, home, x11]
 
 parts:
     main:
         plugin: autotools
-        autotools-configure-parameters: [--prefix=/ --datarootdir=/share]
+        autotools-configure-parameters: [--prefix=/usr]
         source: .
         build-packages: [build-essential, pkg-config, libfltk1.3-dev, libjpeg-turbo8-dev, libpng-dev, zlib1g-dev]
         stage-packages: [libfltk-images1.3, libfltk1.3, libfontconfig1, libfreetype6, libjpeg-turbo8, libpng16-16, libx11-6, libxau6, libxcb1, libxcursor1, libxdmcp6, libxext6, libxfixes3, libxft2, libxinerama1, libxrender1]
