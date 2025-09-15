@@ -23,7 +23,7 @@ apps:
     rasterview:
         extensions: [gnome]
         command: usr/bin/rasterview
-        desktop: usr/share/applications/Development/rasterview.desktop
+        desktop: usr/share/applications/rasterview.desktop
         plugs: [desktop, home, x11]
 
 parts:
